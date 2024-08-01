@@ -15,6 +15,8 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -62,13 +65,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-//                    PreviewView(context).apply {
-//                        setBackgroundColor(Color.Green.toArgb())
-//                        layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-//                        scaleType = PreviewView.ScaleType.FILL_START
-//                        implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-//                    }
-                    CameraPreview()
+                    Box {
+                        CameraPreview()
+                        Box(Modifier.fillMaxSize().background(Color.Transparent)) {
+//                            Text(text = "", Modifier.align(Alignment.Center))
+                        }
+                    }
                 }
             }
         }
@@ -153,6 +155,8 @@ class MainActivity : ComponentActivity() {
                         cameraProvider.bindToLifecycle(
                             lifecycleOwner, cameraSelector, preview
                         )
+                        
+
                     } catch (exc: Exception) {
                         Log.v(TAG, "Use case binding failed", exc)
                     }
