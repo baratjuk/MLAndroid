@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
                             Modifier
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
-                            cameraViewModel.bitmap.value?.asImageBitmap()?.let {
+                            cameraViewModel.bitmap?.asImageBitmap()?.let {
                                 Image(
                                     bitmap = it,
                                     contentDescription = null,
@@ -106,35 +106,26 @@ class MainActivity : ComponentActivity() {
                     // Preview is incorrectly scaled in Compose on some devices without this
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
-
                 val cameraProvider = ProcessCameraProvider.getInstance(context)
-
                 cameraProvider.addListener({
                     val cameraProvider = cameraProvider.get()
-
-                    // Preview
                     val preview = Preview.Builder()
                         .build()
                         .also {
                             it.setSurfaceProvider(previewView.surfaceProvider)
                         }
-
                     val builder = ImageAnalysis.Builder()
                     val analysisUseCase = builder.build()
                     analysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(this),
                         { imageProxy: ImageProxy ->
                             val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                             Log.v(TAG, rotationDegrees.toString())
-
                             BitmapUtils.getBitmap(imageProxy)?.let {
-                                cameraViewModel.bitmap.value = it
+                                cameraViewModel.bitmap = it
                             }
                         })
-
                     try {
-                        // Must unbind the use-cases before rebinding them.
                         cameraProvider.unbindAll()
-
                         cameraProvider.bindToLifecycle(
                             lifecycleOwner, cameraSelector, preview
                         )
@@ -145,7 +136,6 @@ class MainActivity : ComponentActivity() {
                         Log.v(TAG, "Use case binding failed", exc)
                     }
                 }, ContextCompat.getMainExecutor(context))
-
                 previewView
             })
     }
