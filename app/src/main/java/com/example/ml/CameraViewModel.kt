@@ -5,11 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 
 class CameraViewModel {
     var bitmap
-        get() = mutableBitmap.value
+        get() = mutableStateBitmap.value
         set(value) {
-            mutableBitmap.value = value
+            mutableStateBitmap.value = value
         }
-    private var mutableBitmap = mutableStateOf<Bitmap?>(null)
+    private var mutableStateBitmap = mutableStateOf<Bitmap?>(null)
     init {
     }
 }
