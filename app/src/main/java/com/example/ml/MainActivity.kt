@@ -22,13 +22,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -47,7 +54,6 @@ class MainActivity : ComponentActivity() {
 
     private var cameraXSource: CameraXSource? = null
     private var previewView: PreviewView? = null
-//    val bm1 = remember { mutableStateOf<Bitmap?>(null) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,13 +71,25 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box {
-                        CameraPreview()
+                        var (bm, updateBm) = remember { mutableStateOf<Bitmap?>(null) }
+                        CameraPreview { bitmap: Bitmap ->
+                            updateBm(bitmap)
+                        }
                         Box(
                             Modifier
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
 //                            Text(text = "", Modifier.align(Alignment.Center))
-//                            Image(bitmap = bm1, contentDescription = "test 1")
+
+                            bm?.asImageBitmap()?.let {
+                                Image(
+                                    bitmap = it,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(128.dp)
+                                        .align(Alignment.Center)
+                                )
+                            }
                         }
                     }
                 }
@@ -125,6 +143,7 @@ class MainActivity : ComponentActivity() {
         modifier: Modifier = Modifier,
         cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
         scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FILL_CENTER,
+        bitmapUpdate: (bitmap:Bitmap)->Unit
     ) {
         val lifecycleOwner = LocalLifecycleOwner.current
         AndroidView(
@@ -159,8 +178,9 @@ class MainActivity : ComponentActivity() {
                             val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                             Log.v(TAG, rotationDegrees.toString())
 
-                            var bitmap = BitmapUtils.getBitmap(imageProxy)
-//                            updateBitmap(bitmap)
+                            BitmapUtils.getBitmap(imageProxy)?.let {
+                                bitmapUpdate(it)
+                            }
                         })
 
                     try {
