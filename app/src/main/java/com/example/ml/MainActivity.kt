@@ -3,31 +3,30 @@ package com.example.ml
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.widget.LinearLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
@@ -35,7 +34,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.ml.ui.theme.MLTheme
 import com.google.mlkit.vision.camera.CameraXSource
-import java.util.ArrayList
 
 class MainActivity : ComponentActivity() {
     val TAG = "ML.MainActivity"
@@ -49,6 +47,7 @@ class MainActivity : ComponentActivity() {
 
     private var cameraXSource: CameraXSource? = null
     private var previewView: PreviewView? = null
+//    val bm1 = remember { mutableStateOf<Bitmap?>(null) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +66,12 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Box {
                         CameraPreview()
-                        Box(Modifier.fillMaxSize().background(Color.Transparent)) {
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .background(Color.Transparent)) {
 //                            Text(text = "", Modifier.align(Alignment.Center))
+//                            Image(bitmap = bm1, contentDescription = "test 1")
                         }
                     }
                 }
@@ -116,6 +119,7 @@ class MainActivity : ComponentActivity() {
         return false
     }
 
+    @OptIn(ExperimentalGetImage::class)
     @Composable
     fun CameraPreview(
         modifier: Modifier = Modifier,
@@ -136,10 +140,10 @@ class MainActivity : ComponentActivity() {
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
 
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                val cameraProvider = ProcessCameraProvider.getInstance(context)
 
-                cameraProviderFuture.addListener({
-                    val cameraProvider = cameraProviderFuture.get()
+                cameraProvider.addListener({
+                    val cameraProvider = cameraProvider.get()
 
                     // Preview
                     val preview = Preview.Builder()
@@ -148,6 +152,17 @@ class MainActivity : ComponentActivity() {
                             it.setSurfaceProvider(previewView.surfaceProvider)
                         }
 
+                    val builder = ImageAnalysis.Builder()
+                    val analysisUseCase = builder.build()
+                    analysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(this),
+                        { imageProxy: ImageProxy ->
+                            val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                            Log.v(TAG, rotationDegrees.toString())
+
+                            var bitmap = BitmapUtils.getBitmap(imageProxy)
+//                            updateBitmap(bitmap)
+                        })
+
                     try {
                         // Must unbind the use-cases before rebinding them.
                         cameraProvider.unbindAll()
@@ -155,8 +170,9 @@ class MainActivity : ComponentActivity() {
                         cameraProvider.bindToLifecycle(
                             lifecycleOwner, cameraSelector, preview
                         )
-                        
-
+                        cameraProvider.bindToLifecycle(
+                            lifecycleOwner, cameraSelector, analysisUseCase
+                        )
                     } catch (exc: Exception) {
                         Log.v(TAG, "Use case binding failed", exc)
                     }
