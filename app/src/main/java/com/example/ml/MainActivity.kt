@@ -44,13 +44,6 @@ import com.google.mlkit.vision.camera.CameraXSource
 
 class MainActivity : ComponentActivity() {
     val TAG = "ML.MainActivity"
-    private val REQUIRED_RUNTIME_PERMISSIONS =
-        arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        )
-    private val PERMISSION_REQUESTS = 1
 
     private var cameraXSource: CameraXSource? = null
     private var previewView: PreviewView? = null
@@ -58,8 +51,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!allRuntimePermissionsGranted()) {
-            getRuntimePermissions()
+        if (!allRuntimePermissionsGranted(this)) {
+            getRuntimePermissions(this)
         }
 
         enableEdgeToEdge()
@@ -93,46 +86,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun allRuntimePermissionsGranted(): Boolean {
-        for (permission in REQUIRED_RUNTIME_PERMISSIONS) {
-            permission?.let {
-                if (!isPermissionGranted(this, it)) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
-
-    private fun getRuntimePermissions() {
-        val permissionsToRequest = ArrayList<String>()
-        for (permission in REQUIRED_RUNTIME_PERMISSIONS) {
-            permission?.let {
-                if (!isPermissionGranted(this, it)) {
-                    permissionsToRequest.add(permission)
-                }
-            }
-        }
-
-        if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                this,
-                permissionsToRequest.toTypedArray(),
-                PERMISSION_REQUESTS
-            )
-        }
-    }
-
-    private fun isPermissionGranted(context: Context, permission: String): Boolean {
-        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.i(TAG, "Permission granted: $permission")
-            return true
-        }
-        Log.i(TAG, "Permission NOT granted: $permission")
-        return false
     }
 
     @OptIn(ExperimentalGetImage::class)
