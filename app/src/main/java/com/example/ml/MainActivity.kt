@@ -79,15 +79,13 @@ class MainActivity : ComponentActivity() {
                             Modifier
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
-//                            Text(text = "", Modifier.align(Alignment.Center))
-
                             bm?.asImageBitmap()?.let {
                                 Image(
                                     bitmap = it,
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(128.dp)
-                                        .align(Alignment.Center)
+                                        .align(Alignment.BottomEnd)
                                 )
                             }
                         }
