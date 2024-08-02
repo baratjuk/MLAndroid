@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
 
     private var cameraXSource: CameraXSource? = null
     private var previewView: PreviewView? = null
+    val cameraViewModel = CameraViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,15 +65,12 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box {
-                        var (bm, updateBm) = remember { mutableStateOf<Bitmap?>(null) }
-                        CameraPreview { bitmap: Bitmap ->
-                            updateBm(bitmap)
-                        }
+                        CameraPreview()
                         Box(
                             Modifier
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
-                            bm?.asImageBitmap()?.let {
+                            cameraViewModel.bitmap.value?.asImageBitmap()?.let {
                                 Image(
                                     bitmap = it,
                                     contentDescription = null,
@@ -93,8 +91,7 @@ class MainActivity : ComponentActivity() {
     fun CameraPreview(
         modifier: Modifier = Modifier,
         cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
-        scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FILL_CENTER,
-        bitmapUpdate: (bitmap:Bitmap)->Unit
+        scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FILL_CENTER
     ) {
         val lifecycleOwner = LocalLifecycleOwner.current
         AndroidView(
@@ -130,7 +127,7 @@ class MainActivity : ComponentActivity() {
                             Log.v(TAG, rotationDegrees.toString())
 
                             BitmapUtils.getBitmap(imageProxy)?.let {
-                                bitmapUpdate(it)
+                                cameraViewModel.bitmap.value = it
                             }
                         })
 
