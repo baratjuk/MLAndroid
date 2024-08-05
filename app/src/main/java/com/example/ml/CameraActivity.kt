@@ -33,7 +33,7 @@ import com.example.ml.ui.theme.MLTheme
 import com.google.mlkit.vision.camera.CameraXSource
 
 class CameraActivity : ComponentActivity() {
-    val TAG = "ML.MainActivity"
+    val TAG = "ML.CameraActivity"
 
     private var cameraXSource: CameraXSource? = null
     private var previewView: PreviewView? = null

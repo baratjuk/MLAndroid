@@ -59,8 +59,12 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("com.google.mlkit:image-labeling:17.0.8")
     implementation(libs.camera)
+    implementation("com.google.mlkit:image-labeling:17.0.8")
+    // Object detection feature with bundled default classifier
+    implementation("com.google.mlkit:object-detection:17.0.1")
+    // Object detection feature with custom classifier support
+    implementation("com.google.mlkit:object-detection-custom:17.0.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
