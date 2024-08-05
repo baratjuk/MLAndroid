@@ -6,9 +6,7 @@ import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
@@ -111,8 +109,7 @@ class CameraActivity : ComponentActivity() {
                     var i = 0
                     imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this),
                         { imageProxy: ImageProxy ->
-                            cameraViewModel.imageProxy = imageProxy
-                            imageProxy.close()
+                            cameraViewModel.updateImage(imageProxy)
                         })
                     try {
                         cameraProvider.unbindAll()
