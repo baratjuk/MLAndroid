@@ -80,7 +80,6 @@ class CameraActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalGetImage::class)
     @Composable
     fun CameraPreview(
         cameraSelector: CameraSelector,
@@ -109,13 +108,10 @@ class CameraActivity : ComponentActivity() {
                         }
                     val builder = ImageAnalysis.Builder()
                     val imageAnalysis = builder.build()
+                    var i = 0
                     imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this),
                         { imageProxy: ImageProxy ->
-                            val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-                            Log.v(TAG, rotationDegrees.toString())
-                            BitmapUtils.getBitmap(imageProxy)?.let {
-                                cameraViewModel.bitmap = it
-                            }
+                            cameraViewModel.imageProxy = imageProxy
                             imageProxy.close()
                         })
                     try {
