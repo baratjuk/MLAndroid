@@ -40,8 +40,8 @@ class CameraViewModel {
             override fun on(list: List<DetectedObject>) {
                 for(detectedObject in list) {
                     detectedObject.boundingBox
-                    for(label in detectedObject.labels) {
-                        Log.v(TAG, label.text + " " + label.index + " " + label.confidence)
+                    detectedObject.labels.forEach {
+                        Log.v(TAG, it.text + " " + it.index + " " + it.confidence)
                     }
                 }
 
