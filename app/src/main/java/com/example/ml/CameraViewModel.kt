@@ -1,6 +1,7 @@
 package com.example.ml
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -8,9 +9,12 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.google.mlkit.vision.objects.DetectedObject
 import kotlinx.coroutines.launch
 
 class CameraViewModel {
+    val TAG = "ML.CameraViewModel"
+
     val bitmap
         get() = mutableStateBitmap.value
     var cameraSelector: CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
@@ -33,7 +37,13 @@ class CameraViewModel {
 
     init {
         mlObjectRecognizer = object:MlObjectRecognizer() {
-            override fun on() {
+            override fun on(list: List<DetectedObject>) {
+                for(detectedObject in list) {
+                    detectedObject.boundingBox
+                    for(label in detectedObject.labels) {
+                        Log.v(TAG, label.text + " " + label.index + " " + label.confidence)
+                    }
+                }
 
             }
         }

@@ -5,6 +5,7 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import com.google.android.odml.image.MediaMlImageBuilder
 import com.google.mlkit.common.model.LocalModel
+import com.google.mlkit.vision.objects.DetectedObject
 import com.google.mlkit.vision.objects.ObjectDetection
 import com.google.mlkit.vision.objects.ObjectDetector
 import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions
@@ -17,7 +18,7 @@ import kotlinx.coroutines.withContext
 abstract class MlObjectRecognizer {
     val TAG = "ML.MlObjectRecognizer"
 
-    abstract fun on()
+    abstract fun on(list: List<DetectedObject>)
 
     private val objectDetector: ObjectDetector
     private val localModel: LocalModel
@@ -44,9 +45,8 @@ abstract class MlObjectRecognizer {
                 }
             mlImage?.let {
                 objectDetector.process(it)
-                    .addOnSuccessListener { res ->
-                        Log.v(TAG, res.size.toString())
-                        on()
+                    .addOnSuccessListener { result ->
+                        on(result)
                         image.close()
                     }
                     .addOnFailureListener { e ->
