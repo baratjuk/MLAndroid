@@ -20,7 +20,7 @@
         android:theme="@style/Theme.ML"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".CameraActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.ML">
