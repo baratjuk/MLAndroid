@@ -83,13 +83,12 @@ class CameraActivity : ComponentActivity() {
     @OptIn(ExperimentalGetImage::class)
     @Composable
     fun CameraPreview(
-        modifier: Modifier = Modifier,
         cameraSelector: CameraSelector,
         scaleType: PreviewView.ScaleType,
     ) {
         val lifecycleOwner = LocalLifecycleOwner.current
         AndroidView(
-            modifier = modifier,
+            modifier = Modifier,
             factory = { context ->
                 val previewView = PreviewView(context).apply {
                     this.scaleType = scaleType
@@ -109,14 +108,15 @@ class CameraActivity : ComponentActivity() {
                             it.setSurfaceProvider(previewView.surfaceProvider)
                         }
                     val builder = ImageAnalysis.Builder()
-                    val analysisUseCase = builder.build()
-                    analysisUseCase.setAnalyzer(ContextCompat.getMainExecutor(this),
+                    val imageAnalysis = builder.build()
+                    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this),
                         { imageProxy: ImageProxy ->
                             val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                             Log.v(TAG, rotationDegrees.toString())
                             BitmapUtils.getBitmap(imageProxy)?.let {
                                 cameraViewModel.bitmap = it
                             }
+                            imageProxy.close()
                         })
                     try {
                         cameraProvider.unbindAll()
@@ -124,7 +124,7 @@ class CameraActivity : ComponentActivity() {
                             lifecycleOwner, cameraSelector, preview
                         )
                         cameraProvider.bindToLifecycle(
-                            lifecycleOwner, cameraSelector, analysisUseCase
+                            lifecycleOwner, cameraSelector, imageAnalysis
                         )
                     } catch (exc: Exception) {
                         Log.v(TAG, "Use case binding failed", exc)
