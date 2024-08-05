@@ -65,7 +65,9 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box {
-                        CameraPreview()
+                        CameraPreview(
+                            cameraSelector = cameraViewModel.cameraSelector,
+                            scaleType = cameraViewModel.scaleType)
                         Box(
                             Modifier
                                 .fillMaxSize()
@@ -90,8 +92,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun CameraPreview(
         modifier: Modifier = Modifier,
-        cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
-        scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FILL_CENTER
+        cameraSelector: CameraSelector,
+        scaleType: PreviewView.ScaleType,
     ) {
         val lifecycleOwner = LocalLifecycleOwner.current
         AndroidView(
