@@ -12,18 +12,23 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -73,6 +78,25 @@ class CameraActivity : ComponentActivity() {
                                         .size(128.dp)
                                         .align(Alignment.BottomEnd)
                                 )
+                            }
+                            Canvas(
+                                modifier = Modifier
+                                    .padding(horizontal = 0.dp)
+                                    .fillMaxSize()
+                            ) {
+                                val width = size.width
+                                val height = size.height
+                                cameraViewModel.mutableRect1.value
+                                    ?.let {
+                                        drawRect(
+                                            color = Color.Red,
+                                            size = Size(it.left - it.right, it.top - it.bottom),
+                                            topLeft = Offset(it.left, it.top),
+                                            style = Stroke(
+                                                width = 3f
+                                            )
+                                        )
+                                    }
                             }
                         }
                     }

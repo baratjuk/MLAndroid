@@ -1,6 +1,8 @@
 package com.example.ml.vm
 
 import android.graphics.Bitmap
+import android.graphics.Rect
+import android.graphics.RectF
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
@@ -17,6 +19,8 @@ class CameraViewModel {
 
     val bitmap
         get() = mutableStateBitmap.value
+    var mutableRect1 = mutableStateOf<RectF?>(null)
+
     var cameraSelector: CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
     var scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_START // FILL_CENTER
 
@@ -38,6 +42,10 @@ class CameraViewModel {
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
             override fun on(list: List<DetectedObject>) {
+                list.firstOrNull()?.let {
+                    val x = it.boundingBox
+                    mutableRect1.value = RectF(x.left.toFloat(), x.top.toFloat(), x.right.toFloat(), x.bottom.toFloat())
+                }
                 for(detectedObject in list) {
                     detectedObject.boundingBox
                     detectedObject.labels.forEach {
