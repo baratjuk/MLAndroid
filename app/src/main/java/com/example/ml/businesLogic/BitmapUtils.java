@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.ml;
+package com.example.ml.businesLogic;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;

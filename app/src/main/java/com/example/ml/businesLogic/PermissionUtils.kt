@@ -1,4 +1,4 @@
-package com.example.ml
+package com.example.ml.businesLogic
 
 import android.Manifest
 import android.app.Activity

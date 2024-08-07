@@ -1,6 +1,5 @@
-package com.example.ml
+package com.example.ml.businesLogic
 
-import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import com.google.android.odml.image.MediaMlImageBuilder
@@ -11,9 +10,7 @@ import com.google.mlkit.vision.objects.ObjectDetector
 import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 abstract class MlObjectRecognizer {
     val TAG = "ML.MlObjectRecognizer"

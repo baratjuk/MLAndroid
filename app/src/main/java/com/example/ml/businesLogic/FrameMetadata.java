@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.ml;
+package com.example.ml.businesLogic;
 
 /** Describing a frame info. */
 public class FrameMetadata {

@@ -1,4 +1,4 @@
-package com.example.ml
+package com.example.ml.activity
 
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +29,9 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.ml.vm.CameraViewModel
+import com.example.ml.businesLogic.allRuntimePermissionsGranted
+import com.example.ml.businesLogic.getRuntimePermissions
 import com.example.ml.ui.theme.MLTheme
 import com.google.mlkit.vision.camera.CameraXSource
 

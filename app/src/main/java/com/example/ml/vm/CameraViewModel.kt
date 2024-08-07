@@ -1,4 +1,4 @@
-package com.example.ml
+package com.example.ml.vm
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -8,9 +8,9 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
+import com.example.ml.businesLogic.BitmapUtils
+import com.example.ml.businesLogic.MlObjectRecognizer
 import com.google.mlkit.vision.objects.DetectedObject
-import kotlinx.coroutines.launch
 
 class CameraViewModel {
     val TAG = "ML.CameraViewModel"
@@ -23,7 +23,7 @@ class CameraViewModel {
     private var mutableStateBitmap = mutableStateOf<Bitmap?>(null)
     private val mlObjectRecognizer : MlObjectRecognizer
 
-        @OptIn(ExperimentalGetImage::class)
+    @OptIn(ExperimentalGetImage::class)
     fun updateImage(imageProxy : ImageProxy) {
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
         BitmapUtils.getBitmap(imageProxy)?.let {
@@ -36,7 +36,7 @@ class CameraViewModel {
     }
 
     init {
-        mlObjectRecognizer = object:MlObjectRecognizer() {
+        mlObjectRecognizer = object: MlObjectRecognizer() {
             override fun on(list: List<DetectedObject>) {
                 for(detectedObject in list) {
                     detectedObject.boundingBox
