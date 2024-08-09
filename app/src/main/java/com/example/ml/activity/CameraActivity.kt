@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.CameraX
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
@@ -46,8 +47,6 @@ import com.google.mlkit.vision.camera.CameraXSource
 class CameraActivity : ComponentActivity() {
     val TAG = "ML.CameraActivity"
 
-    private var cameraXSource: CameraXSource? = null
-    private var previewView: PreviewView? = null
     val cameraViewModel = CameraViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +55,8 @@ class CameraActivity : ComponentActivity() {
         if (!allRuntimePermissionsGranted(this)) {
             getRuntimePermissions(this)
         }
+
+//        val cameraX = CameraX.getOrCreateInstance(this)
 
         enableEdgeToEdge()
         setContent {
@@ -86,11 +87,11 @@ class CameraActivity : ComponentActivity() {
                                         size = item.rectSize,
                                         topLeft = item.rectOffset,
                                         style = Stroke(
-                                            width = 3f
+                                            width = 2f
                                         )
                                     )
                                     val style = TextStyle(
-                                        fontSize = 16.sp,
+                                        fontSize = 18.sp,
                                         color = item.color(index),
                                         background = Color.Transparent
                                     )
@@ -123,7 +124,7 @@ class CameraActivity : ComponentActivity() {
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
-                    scaleX = -1f
+                    scaleX = cameraViewModel.previewScaleX
                     // Preview is incorrectly scaled in Compose on some devices without this
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
@@ -137,7 +138,6 @@ class CameraActivity : ComponentActivity() {
                         }
                     val builder = ImageAnalysis.Builder()
                     val imageAnalysis = builder.build()
-                    var i = 0
                     imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this),
                         { imageProxy: ImageProxy ->
                             cameraViewModel.updateImage(imageProxy)

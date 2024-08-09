@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.CameraX
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
@@ -11,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import com.example.ml.businesLogic.BitmapUtils
 import com.example.ml.businesLogic.MlObjectRecognizer
 import com.google.mlkit.vision.objects.DetectedObject
 
@@ -35,8 +35,9 @@ class CameraViewModel {
     var screenSize : Size? = null
     var scale : Float = 1f
 
-    var cameraSelector: CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA //DEFAULT_BACK_CAMERA
+    var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA //DEFAULT_FRONT_CAMERA //DEFAULT_BACK_CAMERA
     var previewScaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_START //FILL_CENTER
+    var previewScaleX = 1f // -1f
 
     private val mlObjectRecognizer : MlObjectRecognizer
 
