@@ -59,8 +59,8 @@ class CameraViewModel {
                     val box = it.boundingBox
                     val offset = Offset(box.left.toFloat() * scale, box.top.toFloat() * scale)
                     val size = Size(Math.abs(box.left - box.right).toFloat() * scale, Math.abs(box.bottom - box.top).toFloat() * scale)
-                    val label = it.labels.joinToString(separator = "\n", transform = {
-                        it.text + " " + it.index // + " " + it.confidence
+                    val label = it.labels.sortedBy { it.confidence }.joinToString(separator = "\n", transform = {
+                        it.text + " " + it.index
                     })
                     val mlObjInfo = MlObjectInfo(
                         offset,
