@@ -1,8 +1,6 @@
 package com.example.ml.vm
 
 import android.graphics.Bitmap
-import android.graphics.Rect
-import android.graphics.RectF
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
@@ -10,17 +8,20 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import com.example.ml.businesLogic.BitmapUtils
 import com.example.ml.businesLogic.MlObjectRecognizer
 import com.google.mlkit.vision.objects.DetectedObject
 
+data class MlObjectInfo(val rectOffset: Offset, val rectSize: Size, val label: String)
+
 class CameraViewModel {
     val TAG = "ML.CameraViewModel"
-
     val bitmap
         get() = mutableStateBitmap.value
-    var objects = mutableListOf<RectF>()
+    var mlObjectsInfoList = mutableListOf<MlObjectInfo>()
+
     var screenSize : Size? = null
     var k : Float = 1f
 
@@ -47,16 +48,17 @@ class CameraViewModel {
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
             override fun on(list: List<DetectedObject>) {
-                objects.clear()
+                mlObjectsInfoList.clear()
                 list.forEach {
                     val x = it.boundingBox
-                    k = 1f
-                    val recognizedObj = RectF(
-                        (k * x.left).toFloat(),
-                        (k * x.top).toFloat(),
-                        (k + x.right).toFloat(),
-                        (k * x.bottom).toFloat())
-                    objects.add(recognizedObj)
+                    val label = it.labels.joinToString(separator = ";", transform = {
+                        it.text + " " + it.index + " " + it.confidence
+                    })
+                    val mlObjInfo = MlObjectInfo(
+                        Offset(Math.min(x.right, x.left).toFloat(), x.top.toFloat()),
+                        Size(Math.abs(x.left - x.right).toFloat(), Math.abs(x.bottom - x.top).toFloat()),
+                        label)
+                    mlObjectsInfoList.add(mlObjInfo)
                 }
                 for(detectedObject in list) {
                     val x = detectedObject.boundingBox

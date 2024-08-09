@@ -31,7 +31,11 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.ml.vm.CameraViewModel
@@ -79,21 +83,32 @@ class CameraActivity : ComponentActivity() {
                                         .align(Alignment.BottomEnd)
                                 )
                             }
+                            val textMeasurer = rememberTextMeasurer()
+                            val style = TextStyle(
+                                fontSize = 14.sp,
+                                color = Color.Black,
+                                background = Color.Transparent
+                            )
                             Canvas(
                                 modifier = Modifier
                                     .padding(horizontal = 0.dp)
                                     .fillMaxSize()
                             ) {
                                 cameraViewModel.screenSize = size
-                                cameraViewModel.objects.forEach {
+                                cameraViewModel.mlObjectsInfoList.forEach {
                                     drawRect(
                                         color = Color.Red,
-                                        size = Size(Math.abs(it.left - it.right), Math.abs(it.top - it.bottom)),
-                                        topLeft = Offset(it.left, it.top),
+                                        size = it.rectSize,
+                                        topLeft = it.rectOffset,
                                         style = Stroke(
                                             width = 3f
                                         )
                                     )
+                                    drawText(
+                                        textMeasurer = textMeasurer,
+                                        text = it.label,
+                                        style = style,
+                                        topLeft = it.rectOffset)
                                 }
                             }
                         }
