@@ -10,39 +10,45 @@ import androidx.camera.view.PreviewView
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import com.example.ml.businesLogic.BitmapUtils
 import com.example.ml.businesLogic.MlObjectRecognizer
 import com.google.mlkit.vision.objects.DetectedObject
 
-data class MlObjectInfo(val rectOffset: Offset, val rectSize: Size, val label: String)
+data class MlObjectInfo(val rectOffset: Offset, val rectSize: Size, val label: String) {
+    fun color(index: Int) : Color {
+        return when(index % 5) {
+            0 -> Color.White
+            1 -> Color.Yellow
+            2 -> Color.Cyan
+            3 -> Color.Red
+            4 -> Color.Green
+            else -> Color.Blue
+        }
+    }
+}
 
 class CameraViewModel {
     val TAG = "ML.CameraViewModel"
-    val bitmap
-        get() = mutableStateBitmap.value
     var mlObjectsInfoList = mutableListOf<MlObjectInfo>()
 
     var screenSize : Size? = null
-    var k : Float = 1f
+    var scale : Float = 1f
 
-    var cameraSelector: CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-    var scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_START // FILL_CENTER
+    var cameraSelector: CameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA //DEFAULT_BACK_CAMERA
+    var previewScaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_START //FILL_CENTER
 
-    private var mutableStateBitmap = mutableStateOf<Bitmap?>(null)
     private val mlObjectRecognizer : MlObjectRecognizer
 
     @OptIn(ExperimentalGetImage::class)
     fun updateImage(imageProxy : ImageProxy) {
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-        BitmapUtils.getBitmap(imageProxy)?.let {
-            mutableStateBitmap.value =  it
-        }
+        scale = ((screenSize?.width ?: 0) as Float) / imageProxy.height
         imageProxy?.let {
             mlObjectRecognizer.processImage(it)
         }
         Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())
-        k = ((screenSize?.height ?: 0) as Float) / imageProxy.width
-        Log.v(TAG, "imageProxy: " + k)
+        Log.v(TAG, "imageProxy: " + scale)
     }
 
     init {
@@ -50,24 +56,18 @@ class CameraViewModel {
             override fun on(list: List<DetectedObject>) {
                 mlObjectsInfoList.clear()
                 list.forEach {
-                    val x = it.boundingBox
-                    val label = it.labels.joinToString(separator = ";", transform = {
-                        it.text + " " + it.index + " " + it.confidence
+                    val box = it.boundingBox
+                    val offset = Offset(box.left.toFloat() * scale, box.top.toFloat() * scale)
+                    val size = Size(Math.abs(box.left - box.right).toFloat() * scale, Math.abs(box.bottom - box.top).toFloat() * scale)
+                    val label = it.labels.joinToString(separator = "\n", transform = {
+                        it.text + " " + it.index // + " " + it.confidence
                     })
                     val mlObjInfo = MlObjectInfo(
-                        Offset(Math.min(x.right, x.left).toFloat(), x.top.toFloat()),
-                        Size(Math.abs(x.left - x.right).toFloat(), Math.abs(x.bottom - x.top).toFloat()),
+                        offset,
+                        size,
                         label)
                     mlObjectsInfoList.add(mlObjInfo)
                 }
-                for(detectedObject in list) {
-                    val x = detectedObject.boundingBox
-                    Log.v(TAG, x.top.toString() + " " + x.bottom + " " + x.left  + " " + x.right )
-                    detectedObject.labels.forEach {
-                        Log.v(TAG, it.text + " " + it.index + " " + it.confidence)
-                    }
-                }
-
             }
         }
     }

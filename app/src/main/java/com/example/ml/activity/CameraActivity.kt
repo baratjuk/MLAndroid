@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -69,46 +68,37 @@ class CameraActivity : ComponentActivity() {
                     Box {
                         CameraPreview(
                             cameraSelector = cameraViewModel.cameraSelector,
-                            scaleType = cameraViewModel.scaleType)
+                            scaleType = cameraViewModel.previewScaleType)
                         Box(
                             Modifier
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
-                            cameraViewModel.bitmap?.asImageBitmap()?.let {
-                                Image(
-                                    bitmap = it,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(128.dp)
-                                        .align(Alignment.BottomEnd)
-                                )
-                            }
                             val textMeasurer = rememberTextMeasurer()
-                            val style = TextStyle(
-                                fontSize = 14.sp,
-                                color = Color.Black,
-                                background = Color.Transparent
-                            )
                             Canvas(
                                 modifier = Modifier
                                     .padding(horizontal = 0.dp)
                                     .fillMaxSize()
                             ) {
                                 cameraViewModel.screenSize = size
-                                cameraViewModel.mlObjectsInfoList.forEach {
+                                cameraViewModel.mlObjectsInfoList.forEachIndexed { index, item ->
                                     drawRect(
-                                        color = Color.Red,
-                                        size = it.rectSize,
-                                        topLeft = it.rectOffset,
+                                        color = item.color(index),
+                                        size = item.rectSize,
+                                        topLeft = item.rectOffset,
                                         style = Stroke(
                                             width = 3f
                                         )
                                     )
+                                    val style = TextStyle(
+                                        fontSize = 16.sp,
+                                        color = item.color(index),
+                                        background = Color.Transparent
+                                    )
                                     drawText(
                                         textMeasurer = textMeasurer,
-                                        text = it.label,
+                                        text = item.label,
                                         style = style,
-                                        topLeft = it.rectOffset)
+                                        topLeft = item.rectOffset)
                                 }
                             }
                         }
@@ -133,6 +123,7 @@ class CameraActivity : ComponentActivity() {
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
+                    scaleX = -1f
                     // Preview is incorrectly scaled in Compose on some devices without this
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
