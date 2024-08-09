@@ -84,19 +84,17 @@ class CameraActivity : ComponentActivity() {
                                     .padding(horizontal = 0.dp)
                                     .fillMaxSize()
                             ) {
-                                val width = size.width
-                                val height = size.height
-                                cameraViewModel.mutableRect1.value
-                                    ?.let {
-                                        drawRect(
-                                            color = Color.Red,
-                                            size = Size(it.left - it.right, it.top - it.bottom),
-                                            topLeft = Offset(it.left, it.top),
-                                            style = Stroke(
-                                                width = 3f
-                                            )
+                                cameraViewModel.screenSize = size
+                                cameraViewModel.objects.forEach {
+                                    drawRect(
+                                        color = Color.Red,
+                                        size = Size(Math.abs(it.left - it.right), Math.abs(it.top - it.bottom)),
+                                        topLeft = Offset(it.left, it.top),
+                                        style = Stroke(
+                                            width = 3f
                                         )
-                                    }
+                                    )
+                                }
                             }
                         }
                     }
