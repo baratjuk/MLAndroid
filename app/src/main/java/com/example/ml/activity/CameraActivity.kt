@@ -1,5 +1,6 @@
 package com.example.ml.activity
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import com.example.ml.vm.CameraViewModel
 import com.example.ml.businesLogic.allRuntimePermissionsGranted
 import com.example.ml.businesLogic.getRuntimePermissions
@@ -141,12 +143,13 @@ class CameraActivity : ComponentActivity() {
     @Composable
     fun CameraPreview(
     ) {
+        val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
-        val cameraSelector = cameraViewModel.cameraSelector.value
+        var previewView : PreviewView? = null
         AndroidView(
             modifier = Modifier,
             factory = { context ->
-                val previewView = PreviewView(context).apply {
+                    previewView = PreviewView(context).apply {
                     scaleType = cameraViewModel.previewScaleType.value
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -156,35 +159,68 @@ class CameraActivity : ComponentActivity() {
                     // Preview is incorrectly scaled in Compose on some devices without this
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
-                val cameraProvider = ProcessCameraProvider.getInstance(context)
-                cameraProvider.addListener({
-                    val cameraProvider = cameraProvider.get()
-                    val preview = Preview.Builder()
-                        .build()
-                        .also {
-                            it.setSurfaceProvider(previewView.surfaceProvider)
-                        }
-                    val builder = ImageAnalysis.Builder()
-                    val imageAnalysis = builder.build()
-                    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this),
-                        { imageProxy: ImageProxy ->
-                            cameraViewModel.updateImage(imageProxy)
-                        })
-                    try {
-                        cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(
-                            lifecycleOwner, cameraSelector, preview
-                        )
-                        cameraProvider.bindToLifecycle(
-                            lifecycleOwner, cameraSelector, imageAnalysis
-                        )
-                    } catch (exc: Exception) {
-                        Log.v(TAG, "Use case binding failed", exc)
-                    }
-                }, ContextCompat.getMainExecutor(context))
-                previewView
+//                val cameraProvider = ProcessCameraProvider.getInstance(context)
+//                cameraProvider.addListener({
+//                    val cameraProvider = cameraProvider.get()
+//                    val preview = Preview.Builder()
+//                        .build()
+//                        .also {
+//                            it.setSurfaceProvider(previewView.surfaceProvider)
+//                        }
+//                    val builder = ImageAnalysis.Builder()
+//                    val imageAnalysis = builder.build()
+//                    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this),
+//                        { imageProxy: ImageProxy ->
+//                            cameraViewModel.updateImage(imageProxy)
+//                        })
+//                    try {
+//                        cameraProvider.unbindAll()
+//                        cameraProvider.bindToLifecycle(
+//                            lifecycleOwner, cameraSelector, preview
+//                        )
+//                        cameraProvider.bindToLifecycle(
+//                            lifecycleOwner, cameraSelector, imageAnalysis
+//                        )
+//                    } catch (exc: Exception) {
+//                        Log.v(TAG, "Use case binding failed", exc)
+//                    }
+//                }, ContextCompat.getMainExecutor(context))
+                startCamera(context, lifecycleOwner, previewView!!, cameraViewModel.cameraSelector.value)
+                previewView!!
             }, update = {
                 it.scaleType = cameraViewModel.previewScaleType.value
+                if(cameraViewModel.cameraSelector.value == CameraSelector.DEFAULT_BACK_CAMERA) {
+                    startCamera(context, lifecycleOwner, previewView!!, cameraViewModel.cameraSelector.value)
+                }
             })
+    }
+
+    fun startCamera(context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView, cameraSelector: CameraSelector) {
+        val cameraProvider = ProcessCameraProvider.getInstance(context)
+        cameraProvider.addListener({
+            val cameraProvider = cameraProvider.get()
+            val preview = Preview.Builder()
+                .build()
+                .also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+            val builder = ImageAnalysis.Builder()
+            val imageAnalysis = builder.build()
+            imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this),
+                { imageProxy: ImageProxy ->
+                    cameraViewModel.updateImage(imageProxy)
+                })
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner, cameraSelector, preview
+                )
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner, cameraSelector, imageAnalysis
+                )
+            } catch (exc: Exception) {
+                Log.v(TAG, "Use case binding failed", exc)
+            }
+        }, ContextCompat.getMainExecutor(context))
     }
 }

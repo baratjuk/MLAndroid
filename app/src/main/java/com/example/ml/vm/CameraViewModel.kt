@@ -82,8 +82,8 @@ class CameraViewModel {
         imageProxy?.let {
             mlObjectRecognizer.processImage(it)
         }
-        Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())
-        Log.v(TAG, "imageProxy: " + scale)
+//        Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())
+//        Log.v(TAG, "imageProxy: " + scale)
     }
 
     fun toggleCamera() {
