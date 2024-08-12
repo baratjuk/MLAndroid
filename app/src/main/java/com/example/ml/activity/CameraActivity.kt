@@ -17,11 +17,15 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,8 +72,8 @@ class CameraActivity : ComponentActivity() {
                 ) {
                     Box {
                         CameraPreview(
-                            cameraSelector = cameraViewModel.cameraSelector,
-                            scaleType = cameraViewModel.previewScaleType)
+                            cameraSelector = cameraViewModel.cameraSelector.value,
+                            scaleType = cameraViewModel.previewScaleType.value)
                         Box(
                             Modifier
                                 .fillMaxSize()
@@ -101,6 +105,32 @@ class CameraActivity : ComponentActivity() {
                                         style = style,
                                         topLeft = item.rectOffset)
                                 }
+                            }
+                            Column(Modifier.align(Alignment.BottomCenter)) {
+                                Button(
+                                    onClick = {
+                                        cameraViewModel.toggleCamera()
+                                    },
+                                    modifier = Modifier
+                                        .padding(end = 16.dp),
+                                    content = { Text( if (true)  "Front" else "Back") },
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = Color.White,
+                                        containerColor = Color.Black
+                                    )
+                                )
+                                Button(
+                                    onClick = {
+                                        cameraViewModel.togglePreviewScale()
+                                    },
+                                    modifier = Modifier
+                                        .padding(end = 16.dp),
+                                    content = { Text( if (true)  "Fit" else "Fill") },
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = Color.White,
+                                        containerColor = Color.Black
+                                    )
+                                )
                             }
                         }
                     }

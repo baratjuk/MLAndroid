@@ -1,10 +1,8 @@
 package com.example.ml.vm
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.CameraX
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
@@ -30,27 +28,31 @@ data class MlObjectInfo(val rectOffset: Offset, val rectSize: Size, val label: S
 
 class CameraViewModel {
     val TAG = "ML.CameraViewModel"
+
     var mlObjectsInfoList = mutableListOf<MlObjectInfo>()
 
     var screenSize : Size? = null
     var scale : Float = 1f
 
-    var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA //DEFAULT_FRONT_CAMERA //DEFAULT_BACK_CAMERA
-    var previewScaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_START //FILL_CENTER
+    var cameraSelector = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
+        set(value) {
+            if (value.value == CameraSelector.DEFAULT_FRONT_CAMERA) {
+
+            } else {
+
+            }
+        }
+    var previewScaleType = mutableStateOf(PreviewView.ScaleType.FIT_CENTER)
+        set(value) {
+            if(value.value == PreviewView.ScaleType.FIT_CENTER) {
+
+            } else {
+
+            }
+        }
     var previewScaleX = 1f // -1f
 
     private val mlObjectRecognizer : MlObjectRecognizer
-
-    @OptIn(ExperimentalGetImage::class)
-    fun updateImage(imageProxy : ImageProxy) {
-        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-        scale = ((screenSize?.width ?: 0) as Float) / imageProxy.height
-        imageProxy?.let {
-            mlObjectRecognizer.processImage(it)
-        }
-        Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())
-        Log.v(TAG, "imageProxy: " + scale)
-    }
 
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
@@ -70,6 +72,33 @@ class CameraViewModel {
                     mlObjectsInfoList.add(mlObjInfo)
                 }
             }
+        }
+    }
+
+    @OptIn(ExperimentalGetImage::class)
+    fun updateImage(imageProxy : ImageProxy) {
+        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+        scale = ((screenSize?.width ?: 0) as Float) / imageProxy.height
+        imageProxy?.let {
+            mlObjectRecognizer.processImage(it)
+        }
+        Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())
+        Log.v(TAG, "imageProxy: " + scale)
+    }
+
+    fun toggleCamera() {
+        if (cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA) {
+            cameraSelector.value = CameraSelector.DEFAULT_BACK_CAMERA
+        } else {
+            cameraSelector.value = CameraSelector.DEFAULT_FRONT_CAMERA
+        }
+    }
+
+    fun togglePreviewScale() {
+        if (previewScaleType.value == PreviewView.ScaleType.FIT_CENTER) {
+            previewScaleType.value = PreviewView.ScaleType.FILL_CENTER
+        } else {
+            previewScaleType.value = PreviewView.ScaleType.FIT_CENTER
         }
     }
 }
