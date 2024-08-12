@@ -71,9 +71,7 @@ class CameraActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box {
-                        CameraPreview(
-                            cameraSelector = cameraViewModel.cameraSelector.value,
-                            scaleType = cameraViewModel.previewScaleType.value)
+                        CameraPreview()
                         Box(
                             Modifier
                                 .fillMaxSize()
@@ -110,7 +108,7 @@ class CameraActivity : ComponentActivity() {
                                 Button(
                                     onClick = {
                                         cameraViewModel.toggleCamera()
-                                        recreate()
+//                                        recreate()
                                     },
                                     modifier = Modifier
                                         .padding(end = 16.dp),
@@ -142,15 +140,14 @@ class CameraActivity : ComponentActivity() {
 
     @Composable
     fun CameraPreview(
-        cameraSelector: CameraSelector,
-        scaleType: PreviewView.ScaleType,
     ) {
         val lifecycleOwner = LocalLifecycleOwner.current
+        val cameraSelector = cameraViewModel.cameraSelector.value
         AndroidView(
             modifier = Modifier,
             factory = { context ->
                 val previewView = PreviewView(context).apply {
-                    this.scaleType = scaleType
+                    scaleType = cameraViewModel.previewScaleType.value
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
