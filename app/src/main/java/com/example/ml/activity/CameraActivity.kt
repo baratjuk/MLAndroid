@@ -110,6 +110,7 @@ class CameraActivity : ComponentActivity() {
                                 Button(
                                     onClick = {
                                         cameraViewModel.toggleCamera()
+                                        recreate()
                                     },
                                     modifier = Modifier
                                         .padding(end = 16.dp),
@@ -185,6 +186,8 @@ class CameraActivity : ComponentActivity() {
                     }
                 }, ContextCompat.getMainExecutor(context))
                 previewView
+            }, update = {
+                it.scaleType = cameraViewModel.previewScaleType.value
             })
     }
 }
