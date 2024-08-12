@@ -114,7 +114,7 @@ class CameraActivity : ComponentActivity() {
                                     },
                                     modifier = Modifier
                                         .padding(end = 16.dp),
-                                    content = { Text( if (true)  "Front" else "Back") },
+                                    content = { Text( if (cameraViewModel.isFrontCamera)  "Front" else "Back") },
                                     colors = ButtonDefaults.buttonColors(
                                         contentColor = Color.White,
                                         containerColor = Color.Black
@@ -126,7 +126,7 @@ class CameraActivity : ComponentActivity() {
                                     },
                                     modifier = Modifier
                                         .padding(end = 16.dp),
-                                    content = { Text( if (true)  "Fit" else "Fill") },
+                                    content = { Text( if (cameraViewModel.isFitCenter)  "Fit" else "Fill") },
                                     colors = ButtonDefaults.buttonColors(
                                         contentColor = Color.White,
                                         containerColor = Color.Black
@@ -163,6 +163,7 @@ class CameraActivity : ComponentActivity() {
                 previewView!!
             }, update = {
                 it.scaleType = cameraViewModel.previewScaleType.value
+                cameraViewModel.cameraSelector
                 startCamera(context, lifecycleOwner, previewView!!, cameraViewModel.cameraSelector.value)
             })
     }
