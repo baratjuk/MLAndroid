@@ -62,8 +62,6 @@ class CameraActivity : ComponentActivity() {
             getRuntimePermissions(this)
         }
 
-//        val cameraX = CameraX.getOrCreateInstance(this)
-
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
@@ -110,7 +108,6 @@ class CameraActivity : ComponentActivity() {
                                 Button(
                                     onClick = {
                                         cameraViewModel.toggleCamera()
-//                                        recreate()
                                     },
                                     modifier = Modifier
                                         .padding(end = 16.dp),
@@ -145,11 +142,11 @@ class CameraActivity : ComponentActivity() {
     ) {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
-        var previewView : PreviewView? = null
+        var previewView = PreviewView(context)
         AndroidView(
             modifier = Modifier,
             factory = { context ->
-                    previewView = PreviewView(context).apply {
+                previewView.apply {
                     scaleType = cameraViewModel.previewScaleType.value
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -159,12 +156,12 @@ class CameraActivity : ComponentActivity() {
                     // Preview is incorrectly scaled in Compose on some devices without this
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
-                startCamera(context, lifecycleOwner, previewView!!, cameraViewModel.cameraSelector.value)
-                previewView!!
+                startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelector.value)
+                previewView
             }, update = {
                 Log.v(TAG, "update" )
                 it.scaleType = cameraViewModel.previewScaleType.value
-                startCamera(context, lifecycleOwner, previewView!!, cameraViewModel.cameraSelector.value)
+                startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelector.value)
             })
     }
 
