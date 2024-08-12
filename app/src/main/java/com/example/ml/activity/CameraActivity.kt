@@ -162,8 +162,8 @@ class CameraActivity : ComponentActivity() {
                 startCamera(context, lifecycleOwner, previewView!!, cameraViewModel.cameraSelector.value)
                 previewView!!
             }, update = {
+                Log.v(TAG, "update" )
                 it.scaleType = cameraViewModel.previewScaleType.value
-                cameraViewModel.cameraSelector
                 startCamera(context, lifecycleOwner, previewView!!, cameraViewModel.cameraSelector.value)
             })
     }
