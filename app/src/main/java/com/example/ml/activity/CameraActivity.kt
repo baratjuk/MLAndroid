@@ -86,8 +86,8 @@ class CameraActivity : ComponentActivity() {
                                 cameraViewModel.mlObjectsInfoList.forEachIndexed { index, item ->
                                     drawRect(
                                         color = item.color(index),
-                                        size = item.rectSize,
-                                        topLeft = item.rectOffset,
+                                        size = item.size,
+                                        topLeft = item.offset,
                                         style = Stroke(
                                             width = 2f
                                         )
@@ -101,7 +101,7 @@ class CameraActivity : ComponentActivity() {
                                         textMeasurer = textMeasurer,
                                         text = item.label,
                                         style = style,
-                                        topLeft = item.rectOffset)
+                                        topLeft = item.offset)
                                 }
                             }
                             Column(Modifier.align(Alignment.BottomCenter)) {

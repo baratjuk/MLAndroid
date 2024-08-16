@@ -1,5 +1,6 @@
 package com.example.ml.vm
 
+import android.graphics.Rect
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
@@ -13,21 +14,33 @@ import androidx.compose.ui.graphics.Color
 import com.example.ml.businesLogic.MlObjectRecognizer
 import com.google.mlkit.vision.objects.DetectedObject
 
-data class MlObjectInfo(val rectOffset: Offset, val rectSize: Size, val label: String) {
-    fun color(index: Int) : Color {
-        return when(index % 5) {
-            0 -> Color.White
-            1 -> Color.Yellow
-            2 -> Color.Cyan
-            3 -> Color.Red
-            4 -> Color.Green
-            else -> Color.Blue
-        }
-    }
-}
-
 class CameraViewModel {
     val TAG = "ML.CameraViewModel"
+
+    inner class MlObjectInfo(rect : Rect, val label: String) {
+        val offset: Offset
+        val size: Size
+        init {
+            if(isFrontCamera) {
+                offset = Offset(rect.left.toFloat() * scale, rect.top.toFloat() * scale)
+                size = Size(Math.abs(rect.left - rect.right).toFloat() * scale, Math.abs(rect.bottom - rect.top).toFloat() * scale)
+            } else {
+                offset = Offset(rect.left.toFloat() * scale, rect.top.toFloat() * scale)
+                size = Size(Math.abs(rect.left - rect.right).toFloat() * scale, Math.abs(rect.bottom - rect.top).toFloat() * scale)
+            }
+        }
+
+        fun color(index: Int) : Color {
+            return when(index % 5) {
+                0 -> Color.White
+                1 -> Color.Yellow
+                2 -> Color.Cyan
+                3 -> Color.Red
+                4 -> Color.Green
+                else -> Color.Blue
+            }
+        }
+    }
 
     var mlObjectsInfoList = mutableListOf<MlObjectInfo>()
 
@@ -49,14 +62,11 @@ class CameraViewModel {
                 mlObjectsInfoList.clear()
                 list.forEach {
                     val box = it.boundingBox
-                    val offset = Offset(box.left.toFloat() * scale, box.top.toFloat() * scale)
-                    val size = Size(Math.abs(box.left - box.right).toFloat() * scale, Math.abs(box.bottom - box.top).toFloat() * scale)
                     val label = it.labels.sortedBy { it.confidence }.joinToString(separator = "\n", transform = {
                         it.text + " " + it.index
                     })
                     val mlObjInfo = MlObjectInfo(
-                        offset,
-                        size,
+                        box,
                         label)
                     mlObjectsInfoList.add(mlObjInfo)
                 }
