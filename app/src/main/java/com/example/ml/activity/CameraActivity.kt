@@ -97,12 +97,12 @@ class CameraActivity : ComponentActivity() {
                                         color = item.color(index),
                                         background = Color.Transparent
                                     )
-//                                    drawText(
-//                                        textMeasurer = textMeasurer,
-//                                        text = item.label,
-//                                        style = style,
-//                                        topLeft = item.offset
-//                                    )
+                                    drawText(
+                                        textMeasurer = textMeasurer,
+                                        text = item.label,
+                                        style = style,
+                                        topLeft = item.offset
+                                    )
                                 }
                             }
                             Column(Modifier.align(Alignment.BottomCenter)) {
@@ -113,18 +113,6 @@ class CameraActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .padding(end = 16.dp),
                                     content = { Text( if (cameraViewModel.isFrontCamera)  "Front" else "Back") },
-                                    colors = ButtonDefaults.buttonColors(
-                                        contentColor = Color.White,
-                                        containerColor = Color.Black
-                                    )
-                                )
-                                Button(
-                                    onClick = {
-                                        cameraViewModel.togglePreviewScale()
-                                    },
-                                    modifier = Modifier
-                                        .padding(end = 16.dp),
-                                    content = { Text( if (cameraViewModel.isFitCenter)  "Fit" else "Fill") },
                                     colors = ButtonDefaults.buttonColors(
                                         contentColor = Color.White,
                                         containerColor = Color.Black
@@ -148,7 +136,7 @@ class CameraActivity : ComponentActivity() {
             modifier = Modifier,
             factory = { context ->
                 previewView.apply {
-                    scaleType = cameraViewModel.previewScaleType.value
+                    scaleType = PreviewView.ScaleType.FIT_CENTER
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
@@ -160,7 +148,6 @@ class CameraActivity : ComponentActivity() {
                 previewView
             }, update = {
                 Log.v(TAG, "update" )
-                it.scaleType = cameraViewModel.previewScaleType.value
                 startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelector.value)
             })
     }

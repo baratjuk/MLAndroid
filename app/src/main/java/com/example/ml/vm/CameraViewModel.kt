@@ -21,21 +21,14 @@ class CameraViewModel {
         val offset: Offset
         val size: Size
         init {
-            val scale = try {
-                if (isFitCenter) {
-                    screenSize!!.width / imageSize!!.height
-                } else {
-                    screenSize!!.height / imageSize!!.width
-                }
-            } catch(e : Exception) {
-                0f
-            }
+            var topOffset = (screenSize!!.height/screenSize!!.width - imageSize!!.width/imageSize!!.height) / 2 * screenSize!!.width
+            val scale = screenSize!!.width / imageSize!!.height
             if(isFrontCamera) {
-                offset = Offset(rect.left.toFloat() * scale, rect.top.toFloat() * scale)
                 size = Size(Math.abs(rect.left - rect.right).toFloat() * scale, Math.abs(rect.bottom - rect.top).toFloat() * scale)
+                offset = Offset(screenSize!!.width - rect.left.toFloat() * scale - size.width, rect.top.toFloat() * scale + topOffset)
             } else {
-                offset = Offset(rect.left.toFloat() * scale, rect.top.toFloat() * scale)
                 size = Size(Math.abs(rect.left - rect.right).toFloat() * scale, Math.abs(rect.bottom - rect.top).toFloat() * scale)
+                offset = Offset(rect.left.toFloat() * scale, rect.top.toFloat() * scale + topOffset)
             }
         }
 
@@ -57,11 +50,8 @@ class CameraViewModel {
     var imageSize : Size? = null
 
     var cameraSelector = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
-    var previewScaleType = mutableStateOf(PreviewView.ScaleType.FIT_CENTER)
     val isFrontCamera
         get() = cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA
-    val isFitCenter
-        get() = previewScaleType.value == PreviewView.ScaleType.FIT_CENTER
 
     private val mlObjectRecognizer : MlObjectRecognizer
 
@@ -96,18 +86,11 @@ class CameraViewModel {
     }
 
     fun toggleCamera() {
+        mlObjectsInfoList.clear()
         if (cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA) {
             cameraSelector.value = CameraSelector.DEFAULT_BACK_CAMERA
         } else {
             cameraSelector.value = CameraSelector.DEFAULT_FRONT_CAMERA
-        }
-    }
-
-    fun togglePreviewScale() {
-        if (previewScaleType.value == PreviewView.ScaleType.FIT_CENTER) {
-            previewScaleType.value = PreviewView.ScaleType.FILL_CENTER
-        } else {
-            previewScaleType.value = PreviewView.ScaleType.FIT_CENTER
         }
     }
 }
