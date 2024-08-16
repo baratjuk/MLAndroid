@@ -152,8 +152,7 @@ class CameraActivity : ComponentActivity() {
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
-                    scaleX = cameraViewModel.previewScaleX
-                    // Preview is incorrectly scaled in Compose on some devices without this
+                    // scaleX = -1f // mirroring
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
                 startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelector.value)

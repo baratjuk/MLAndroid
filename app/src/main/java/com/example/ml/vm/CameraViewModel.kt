@@ -35,26 +35,11 @@ class CameraViewModel {
     var scale : Float = 1f
 
     var cameraSelector = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
-        set(value) {
-            if (value.value == CameraSelector.DEFAULT_FRONT_CAMERA) {
-
-            } else {
-
-            }
-        }
+    var previewScaleType = mutableStateOf(PreviewView.ScaleType.FIT_CENTER)
     val isFrontCamera
         get() = cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA
-    var previewScaleType = mutableStateOf(PreviewView.ScaleType.FIT_CENTER)
-        set(value) {
-            if(value.value == PreviewView.ScaleType.FIT_CENTER) {
-
-            } else {
-
-            }
-        }
     val isFitCenter
         get() = previewScaleType.value == PreviewView.ScaleType.FIT_CENTER
-    var previewScaleX = 1f // -1f
 
     private val mlObjectRecognizer : MlObjectRecognizer
 
