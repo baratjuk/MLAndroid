@@ -21,6 +21,15 @@ class CameraViewModel {
         val offset: Offset
         val size: Size
         init {
+            val scale = try {
+                if (isFitCenter) {
+                    screenSize!!.width / imageSize!!.height
+                } else {
+                    screenSize!!.height / imageSize!!.width
+                }
+            } catch(e : Exception) {
+                0f
+            }
             if(isFrontCamera) {
                 offset = Offset(rect.left.toFloat() * scale, rect.top.toFloat() * scale)
                 size = Size(Math.abs(rect.left - rect.right).toFloat() * scale, Math.abs(rect.bottom - rect.top).toFloat() * scale)
@@ -45,7 +54,7 @@ class CameraViewModel {
     var mlObjectsInfoList = mutableListOf<MlObjectInfo>()
 
     var screenSize : Size? = null
-    var scale : Float = 1f
+    var imageSize : Size? = null
 
     var cameraSelector = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
     var previewScaleType = mutableStateOf(PreviewView.ScaleType.FIT_CENTER)
@@ -62,12 +71,14 @@ class CameraViewModel {
                 mlObjectsInfoList.clear()
                 list.forEach {
                     val box = it.boundingBox
-                    val label = it.labels.sortedBy { it.confidence }.joinToString(separator = "\n", transform = {
-                        it.text + " " + it.index
-                    })
+                    val label = it.labels.sortedBy { it.confidence }
+                        .joinToString(separator = "\n", transform = {
+                            it.text + " " + it.index
+                        })
                     val mlObjInfo = MlObjectInfo(
                         box,
-                        label)
+                        label
+                    )
                     mlObjectsInfoList.add(mlObjInfo)
                 }
             }
@@ -76,8 +87,7 @@ class CameraViewModel {
 
     @OptIn(ExperimentalGetImage::class)
     fun updateImage(imageProxy : ImageProxy) {
-        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-        scale = ((screenSize?.width ?: 0) as Float) / imageProxy.height
+        imageSize = Size(imageProxy.width.toFloat(), imageProxy.height.toFloat())
         imageProxy?.let {
             mlObjectRecognizer.processImage(it)
         }

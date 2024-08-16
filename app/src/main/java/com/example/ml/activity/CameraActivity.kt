@@ -97,11 +97,12 @@ class CameraActivity : ComponentActivity() {
                                         color = item.color(index),
                                         background = Color.Transparent
                                     )
-                                    drawText(
-                                        textMeasurer = textMeasurer,
-                                        text = item.label,
-                                        style = style,
-                                        topLeft = item.offset)
+//                                    drawText(
+//                                        textMeasurer = textMeasurer,
+//                                        text = item.label,
+//                                        style = style,
+//                                        topLeft = item.offset
+//                                    )
                                 }
                             }
                             Column(Modifier.align(Alignment.BottomCenter)) {
