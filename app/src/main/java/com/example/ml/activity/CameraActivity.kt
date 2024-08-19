@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -64,7 +65,6 @@ class CameraActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            val context = LocalContext.current
             MLTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -110,7 +110,6 @@ class CameraActivity : ComponentActivity() {
                             Column(
                                 Modifier
                                     .align(Alignment.BottomCenter)
-//                                    .rotate(cameraViewModel.rotationDegreesMutable.value)
                             ) {
                                 Button(
                                     onClick = {
@@ -118,7 +117,10 @@ class CameraActivity : ComponentActivity() {
                                     },
                                     modifier = Modifier
                                         .padding(end = 16.dp),
-                                    content = { Text( if (cameraViewModel.isFrontCamera)  "Front" else "Back") },
+                                    content = {
+                                        Text(
+                                            if (cameraViewModel.isFrontCamera)  "Front" else "Back",
+                                            Modifier.rotate(cameraViewModel.rotationDegreesMutable.value)) },
                                     colors = ButtonDefaults.buttonColors(
                                         contentColor = Color.White,
                                         containerColor = Color.Black
