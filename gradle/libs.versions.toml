@@ -9,6 +9,7 @@ lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.0"
 composeBom = "2024.04.01"
 camera = "16.0.0-beta3"
+faceMeshDetection = "16.0.0-beta3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -26,6 +27,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 camera = { group = "com.google.mlkit", name = "camera", version.ref = "camera" }
+face-mesh-detection = { group = "com.google.mlkit", name = "face-mesh-detection", version.ref = "faceMeshDetection" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -65,6 +65,8 @@ dependencies {
     implementation("com.google.mlkit:object-detection:17.0.1")
     // Object detection feature with custom classifier support
     implementation("com.google.mlkit:object-detection-custom:17.0.1")
+    // face mesh
+    implementation(libs.face.mesh.detection)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
