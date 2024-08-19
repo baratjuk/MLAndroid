@@ -84,6 +84,11 @@ class CameraActivity : ComponentActivity() {
                             Modifier
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
+                            Text(
+                                text = cameraViewModel.rotationDegrees.value.toString(),
+                                Modifier.align(Alignment.TopCenter),
+                                color = Color.White
+                            )
                             val textMeasurer = rememberTextMeasurer()
                             Canvas(
                                 modifier = Modifier

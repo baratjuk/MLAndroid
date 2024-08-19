@@ -93,10 +93,10 @@ class CameraViewModel(val context : Context) {
             }
             override fun onSensorChanged(event: SensorEvent?) {
                 Log.v(TAG, "" + event?.values?.asList() ?: "+++" )
-                val value0 = event?.values?.get(0) ?: 0f
-                val value1 = event?.values?.get(1) ?: 0f
+                val value0 = event?.values?.get(0) ?: return
+                val value1 = event?.values?.get(1) ?: return
                 if( Math.abs(value0) > Math.abs(value1) ) {
-                    if(value1 > 0) {
+                    if(value0 > 0) {
                         Log.v(TAG, "0")
                         rotationDegrees.value = 90f
                     } else {
@@ -104,7 +104,7 @@ class CameraViewModel(val context : Context) {
                         rotationDegrees.value = 270f
                     }
                 } else {
-                    if(value0 > 0) {
+                    if(value1 > 0) {
                         Log.v(TAG, "2")
                         rotationDegrees.value = 180f
                     } else {
@@ -113,7 +113,7 @@ class CameraViewModel(val context : Context) {
                     }
                 }
             }
-        }, gyroscope, SensorManager.SENSOR_DELAY_NORMAL)
+        }, gyroscope, SensorManager.SENSOR_DELAY_UI)
     }
 
     @OptIn(ExperimentalGetImage::class)
