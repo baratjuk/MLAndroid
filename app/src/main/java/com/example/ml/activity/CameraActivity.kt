@@ -84,11 +84,6 @@ class CameraActivity : ComponentActivity() {
                             Modifier
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
-                            Text(
-                                text = cameraViewModel.rotationDegrees.value.toString(),
-                                Modifier.align(Alignment.TopCenter),
-                                color = Color.White
-                            )
                             val textMeasurer = rememberTextMeasurer()
                             Canvas(
                                 modifier = Modifier
@@ -110,7 +105,7 @@ class CameraActivity : ComponentActivity() {
                                         color = item.color(index),
                                         background = Color.Transparent
                                     )
-                                    rotate(degrees = cameraViewModel.rotationDegrees.value, item.offset) {
+                                    rotate(degrees = cameraViewModel.rotationDegrees, item.offset) {
                                         drawText(
                                             textMeasurer = textMeasurer,
                                             text = item.label,

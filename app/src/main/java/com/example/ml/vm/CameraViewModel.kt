@@ -62,7 +62,7 @@ class CameraViewModel(val context : Context) {
     val isFrontCamera
         get() = cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA
 
-    var rotationDegrees = mutableStateOf(0f)
+    var rotationDegrees = 0f
 
     private val mlObjectRecognizer : MlObjectRecognizer
     private val sensorManager : SensorManager
@@ -98,18 +98,18 @@ class CameraViewModel(val context : Context) {
                 if( Math.abs(value0) > Math.abs(value1) ) {
                     if(value0 > 0) {
                         Log.v(TAG, "0")
-                        rotationDegrees.value = 90f
+                        rotationDegrees = 90f
                     } else {
                         Log.v(TAG, "1")
-                        rotationDegrees.value = 270f
+                        rotationDegrees = 270f
                     }
                 } else {
                     if(value1 > 0) {
                         Log.v(TAG, "2")
-                        rotationDegrees.value = 180f
+                        rotationDegrees = 0f
                     } else {
                         Log.v(TAG, "3")
-                        rotationDegrees.value = 0f
+                        rotationDegrees = 180f
                     }
                 }
             }
