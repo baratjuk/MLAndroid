@@ -102,7 +102,8 @@ class CameraActivity : ComponentActivity() {
                                             textMeasurer = textMeasurer,
                                             text = item.label,
                                             style = style,
-                                            topLeft = item.textOffset
+                                            topLeft = item.textOffset,
+                                            maxLines = item.lines()
                                         )
                                     }
                                 }

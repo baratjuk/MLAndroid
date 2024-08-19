@@ -56,6 +56,8 @@ class CameraViewModel(val context : Context) {
                 else -> Color.Blue
             }
         }
+
+        fun lines() = label.split("\n").size
     }
 
     var mlObjectsInfoListMutable = mutableListOf<MlObjectInfo>()
