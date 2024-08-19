@@ -23,8 +23,7 @@
             android:name=".activity.CameraActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.ML"
-            android:screenOrientation="portrait">
+            android:theme="@style/Theme.ML">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

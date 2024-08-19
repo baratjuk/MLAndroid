@@ -1,6 +1,15 @@
 package com.example.ml.vm
 
+import android.content.Context
+import android.content.Context.SENSOR_SERVICE
 import android.graphics.Rect
+import android.hardware.Sensor
+import android.hardware.Sensor.TYPE_ACCELEROMETER
+import android.hardware.Sensor.TYPE_GAME_ROTATION_VECTOR
+import android.hardware.Sensor.TYPE_GYROSCOPE
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
@@ -14,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 import com.example.ml.businesLogic.MlObjectRecognizer
 import com.google.mlkit.vision.objects.DetectedObject
 
-class CameraViewModel {
+class CameraViewModel(val context : Context) {
     val TAG = "ML.CameraViewModel"
 
     inner class MlObjectInfo(rect : Rect, val label: String) {
@@ -53,7 +62,11 @@ class CameraViewModel {
     val isFrontCamera
         get() = cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA
 
+    var rotationDegrees = mutableStateOf(0f)
+
     private val mlObjectRecognizer : MlObjectRecognizer
+    private val sensorManager : SensorManager
+    private val gyroscope : Sensor
 
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
@@ -73,6 +86,34 @@ class CameraViewModel {
                 }
             }
         }
+        sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
+        gyroscope = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER) as Sensor
+        sensorManager.registerListener(object : SensorEventListener {
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+            }
+            override fun onSensorChanged(event: SensorEvent?) {
+                Log.v(TAG, "" + event?.values?.asList() ?: "+++" )
+                val value0 = event?.values?.get(0) ?: 0f
+                val value1 = event?.values?.get(1) ?: 0f
+                if( Math.abs(value0) > Math.abs(value1) ) {
+                    if(value1 > 0) {
+                        Log.v(TAG, "0")
+                        rotationDegrees.value = 90f
+                    } else {
+                        Log.v(TAG, "1")
+                        rotationDegrees.value = 270f
+                    }
+                } else {
+                    if(value0 > 0) {
+                        Log.v(TAG, "2")
+                        rotationDegrees.value = 180f
+                    } else {
+                        Log.v(TAG, "3")
+                        rotationDegrees.value = 0f
+                    }
+                }
+            }
+        }, gyroscope, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     @OptIn(ExperimentalGetImage::class)

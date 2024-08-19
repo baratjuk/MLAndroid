@@ -1,6 +1,8 @@
 package com.example.ml.activity
 
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
@@ -34,6 +36,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
@@ -53,14 +57,18 @@ import com.google.mlkit.vision.camera.CameraXSource
 class CameraActivity : ComponentActivity() {
     val TAG = "ML.CameraActivity"
 
-    val cameraViewModel = CameraViewModel()
+    lateinit var cameraViewModel : CameraViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+
         if (!allRuntimePermissionsGranted(this)) {
             getRuntimePermissions(this)
         }
+
+        cameraViewModel = CameraViewModel(this)
 
         enableEdgeToEdge()
         setContent {
@@ -97,12 +105,14 @@ class CameraActivity : ComponentActivity() {
                                         color = item.color(index),
                                         background = Color.Transparent
                                     )
-                                    drawText(
-                                        textMeasurer = textMeasurer,
-                                        text = item.label,
-                                        style = style,
-                                        topLeft = item.offset
-                                    )
+                                    rotate(degrees = cameraViewModel.rotationDegrees.value, item.offset) {
+                                        drawText(
+                                            textMeasurer = textMeasurer,
+                                            text = item.label,
+                                            style = style,
+                                            topLeft = item.offset
+                                        )
+                                    }
                                 }
                             }
                             Column(Modifier.align(Alignment.BottomCenter)) {
