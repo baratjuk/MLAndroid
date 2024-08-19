@@ -2,7 +2,6 @@ package com.example.ml.activity
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
@@ -10,20 +9,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.CameraX
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -32,12 +28,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
@@ -52,7 +45,6 @@ import com.example.ml.vm.CameraViewModel
 import com.example.ml.businesLogic.allRuntimePermissionsGranted
 import com.example.ml.businesLogic.getRuntimePermissions
 import com.example.ml.ui.theme.MLTheme
-import com.google.mlkit.vision.camera.CameraXSource
 
 class CameraActivity : ComponentActivity() {
     val TAG = "ML.CameraActivity"
@@ -91,7 +83,7 @@ class CameraActivity : ComponentActivity() {
                                     .fillMaxSize()
                             ) {
                                 cameraViewModel.screenSize = size
-                                cameraViewModel.mlObjectsInfoList.forEachIndexed { index, item ->
+                                cameraViewModel.mlObjectsInfoListMutable.forEachIndexed { index, item ->
                                     drawRect(
                                         color = item.color(index),
                                         size = item.size,
@@ -105,7 +97,7 @@ class CameraActivity : ComponentActivity() {
                                         color = item.color(index),
                                         background = Color.Transparent
                                     )
-                                    rotate(degrees = cameraViewModel.rotationDegrees, item.offset) {
+                                    rotate(degrees = cameraViewModel.rotationDegreesMutable.value, item.offset) {
                                         drawText(
                                             textMeasurer = textMeasurer,
                                             text = item.label,
@@ -115,7 +107,11 @@ class CameraActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                            Column(Modifier.align(Alignment.BottomCenter)) {
+                            Column(
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+//                                    .rotate(cameraViewModel.rotationDegreesMutable.value)
+                            ) {
                                 Button(
                                     onClick = {
                                         cameraViewModel.toggleCamera()
@@ -154,11 +150,11 @@ class CameraActivity : ComponentActivity() {
                     // scaleX = -1f // mirroring
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 }
-                startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelector.value)
+                startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelectorMutable.value)
                 previewView
             }, update = {
                 Log.v(TAG, "update" )
-                startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelector.value)
+                startCamera(context, lifecycleOwner, previewView, cameraViewModel.cameraSelectorMutable.value)
             })
     }
 

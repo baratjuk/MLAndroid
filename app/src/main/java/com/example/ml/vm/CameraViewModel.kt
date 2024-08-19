@@ -5,17 +5,13 @@ import android.content.Context.SENSOR_SERVICE
 import android.graphics.Rect
 import android.hardware.Sensor
 import android.hardware.Sensor.TYPE_ACCELEROMETER
-import android.hardware.Sensor.TYPE_GAME_ROTATION_VECTOR
-import android.hardware.Sensor.TYPE_GYROSCOPE
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
-import androidx.camera.view.PreviewView
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -53,16 +49,14 @@ class CameraViewModel(val context : Context) {
         }
     }
 
-    var mlObjectsInfoList = mutableListOf<MlObjectInfo>()
+    var mlObjectsInfoListMutable = mutableListOf<MlObjectInfo>()
+    var cameraSelectorMutable = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
+    var rotationDegreesMutable = mutableStateOf(0f)
 
     var screenSize : Size? = null
     var imageSize : Size? = null
-
-    var cameraSelector = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
     val isFrontCamera
-        get() = cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA
-
-    var rotationDegrees = 0f
+        get() = cameraSelectorMutable.value == CameraSelector.DEFAULT_FRONT_CAMERA
 
     private val mlObjectRecognizer : MlObjectRecognizer
     private val sensorManager : SensorManager
@@ -71,7 +65,7 @@ class CameraViewModel(val context : Context) {
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
             override fun on(list: List<DetectedObject>) {
-                mlObjectsInfoList.clear()
+                mlObjectsInfoListMutable.clear()
                 list.forEach {
                     val box = it.boundingBox
                     val label = it.labels.sortedBy { it.confidence }
@@ -82,7 +76,7 @@ class CameraViewModel(val context : Context) {
                         box,
                         label
                     )
-                    mlObjectsInfoList.add(mlObjInfo)
+                    mlObjectsInfoListMutable.add(mlObjInfo)
                 }
             }
         }
@@ -92,28 +86,25 @@ class CameraViewModel(val context : Context) {
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
             }
             override fun onSensorChanged(event: SensorEvent?) {
-                Log.v(TAG, "" + event?.values?.asList() ?: "+++" )
                 val value0 = event?.values?.get(0) ?: return
                 val value1 = event?.values?.get(1) ?: return
+                var degrees = 0f
                 if( Math.abs(value0) > Math.abs(value1) ) {
                     if(value0 > 0) {
-                        Log.v(TAG, "0")
-                        rotationDegrees = 90f
+                        degrees = 90f
                     } else {
-                        Log.v(TAG, "1")
-                        rotationDegrees = 270f
+                        degrees = 270f
                     }
                 } else {
                     if(value1 > 0) {
-                        Log.v(TAG, "2")
-                        rotationDegrees = 0f
+                        degrees = 0f
                     } else {
-                        Log.v(TAG, "3")
-                        rotationDegrees = 180f
+                        degrees = 180f
                     }
                 }
+                rotationDegreesMutable.value = degrees
             }
-        }, gyroscope, SensorManager.SENSOR_DELAY_UI)
+        }, gyroscope, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     @OptIn(ExperimentalGetImage::class)
@@ -127,11 +118,11 @@ class CameraViewModel(val context : Context) {
     }
 
     fun toggleCamera() {
-        mlObjectsInfoList.clear()
-        if (cameraSelector.value == CameraSelector.DEFAULT_FRONT_CAMERA) {
-            cameraSelector.value = CameraSelector.DEFAULT_BACK_CAMERA
+        mlObjectsInfoListMutable.clear()
+        if (cameraSelectorMutable.value == CameraSelector.DEFAULT_FRONT_CAMERA) {
+            cameraSelectorMutable.value = CameraSelector.DEFAULT_BACK_CAMERA
         } else {
-            cameraSelector.value = CameraSelector.DEFAULT_FRONT_CAMERA
+            cameraSelectorMutable.value = CameraSelector.DEFAULT_FRONT_CAMERA
         }
     }
 }
