@@ -8,6 +8,7 @@ import android.hardware.Sensor.TYPE_ACCELEROMETER
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -25,6 +26,7 @@ class CameraViewModel(val context : Context) {
     inner class MlObjectInfo(rect : Rect, val label: String) {
         val offset: Offset
         val size: Size
+        val textOffset: Offset
         init {
             var topOffset = (screenSize!!.height/screenSize!!.width - imageSize!!.width/imageSize!!.height) / 2 * screenSize!!.width
             val scale = screenSize!!.width / imageSize!!.height
@@ -34,6 +36,13 @@ class CameraViewModel(val context : Context) {
             } else {
                 size = Size(Math.abs(rect.left - rect.right).toFloat() * scale, Math.abs(rect.bottom - rect.top).toFloat() * scale)
                 offset = Offset(rect.left.toFloat() * scale, rect.top.toFloat() * scale + topOffset)
+            }
+            when (rotationDegreesMutable.value) {
+                0f -> textOffset = Offset(offset.x, offset.y)
+                90f -> textOffset = Offset(offset.x + size.width, offset.y)
+                180f -> textOffset = Offset(offset.x + size.width, offset.y + size.height)
+                270f -> textOffset = Offset(offset.x, offset.y + size.height)
+                else -> textOffset = offset.copy()
             }
         }
 
@@ -103,6 +112,7 @@ class CameraViewModel(val context : Context) {
                     }
                 }
                 rotationDegreesMutable.value = degrees
+                Log.v(TAG, "gyroscope: " + degrees)
             }
         }, gyroscope, SensorManager.SENSOR_DELAY_NORMAL)
     }

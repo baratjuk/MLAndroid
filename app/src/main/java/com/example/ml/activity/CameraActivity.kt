@@ -97,12 +97,12 @@ class CameraActivity : ComponentActivity() {
                                         color = item.color(index),
                                         background = Color.Transparent
                                     )
-                                    rotate(degrees = cameraViewModel.rotationDegreesMutable.value, item.offset) {
+                                    rotate(degrees = cameraViewModel.rotationDegreesMutable.value, item.textOffset) {
                                         drawText(
                                             textMeasurer = textMeasurer,
                                             text = item.label,
                                             style = style,
-                                            topLeft = item.offset
+                                            topLeft = item.textOffset
                                         )
                                     }
                                 }
