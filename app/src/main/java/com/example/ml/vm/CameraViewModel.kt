@@ -8,7 +8,6 @@ import android.hardware.Sensor.TYPE_ACCELEROMETER
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -19,6 +18,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import com.example.ml.businesLogic.MlFaceMashRecognizer
 import com.example.ml.businesLogic.MlObjectRecognizer
+import com.google.mlkit.vision.common.PointF3D
 import com.google.mlkit.vision.facemesh.FaceMesh
 import com.google.mlkit.vision.facemesh.FaceMesh.LEFT_EYE
 import com.google.mlkit.vision.facemesh.FaceMesh.RIGHT_EYE
@@ -64,7 +64,22 @@ class CameraViewModel(val context : Context) {
         fun lines() = label.split("\n").size
     }
 
-    data class MlFaceMashInfo(val offset : Offset, val color: Color)
+    enum class Types(i : Int) {
+        LEFT_EYE(0), RIGHT_EYE(1)
+    }
+
+    inner class MlFaceMashInfo(point : PointF3D, val type: Types) {
+        val offset: Offset
+        init {
+            var topOffset = (screenSize!!.height/screenSize!!.width - imageSize!!.width/imageSize!!.height) / 2 * screenSize!!.width
+            val scale = screenSize!!.width / imageSize!!.height
+            if(isFrontCamera) {
+                offset = Offset(screenSize!!.width - point.x * scale, point.y * scale + topOffset)
+            } else {
+                offset = Offset(point.x * scale, point.y * scale + topOffset)
+            }
+        }
+    }
 
     var mlObjectsInfoListMutable = mutableListOf<MlObjectInfo>()
     var cameraSelectorMutable = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
@@ -109,17 +124,11 @@ class CameraViewModel(val context : Context) {
 //                        Log.v(TAG, point.position.toString())
 //                    }
                     for(point in it.getPoints(LEFT_EYE)) {
-                        val mlInfo = MlFaceMashInfo(
-                            Offset(point.position.x, point.position.y),
-                            Color.Cyan
-                        )
+                        val mlInfo = MlFaceMashInfo(point.position, Types.LEFT_EYE)
                         mlFaceMashInfoListMutable.add(mlInfo)
                     }
                     for(point in it.getPoints(RIGHT_EYE)) {
-                        val mlInfo = MlFaceMashInfo(
-                            Offset(point.position.x, point.position.y),
-                            Color.White
-                        )
+                        val mlInfo = MlFaceMashInfo(point.position, Types.RIGHT_EYE)
                         mlFaceMashInfoListMutable.add(mlInfo)
                     }
                 }

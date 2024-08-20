@@ -110,12 +110,10 @@ class CameraActivity : ComponentActivity() {
                                         )
                                     }
                                 }
-//                                drawPoints(points = cameraViewModel.mlFaceMashInfoListMutable.map { it.offset },
-//                                    color = Color.Black,
-//                                    strokeWidth = 4,
-//                                    strokeCap = StrokeCap.Round)
-                                val points: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.map { it.offset }
-                                drawPoints(points, PointMode.Points, Color.Red, 4f, StrokeCap.Round)
+                                val leftEyePoints: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.filter { it.type == CameraViewModel.Types.LEFT_EYE }.map { it.offset }
+                                drawPoints(leftEyePoints, PointMode.Points, Color.Yellow, 4f, StrokeCap.Round)
+                                val rightEyePoints: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.filter { it.type == CameraViewModel.Types.RIGHT_EYE }.map { it.offset }
+                                drawPoints(rightEyePoints, PointMode.Points, Color.Cyan, 4f, StrokeCap.Round)
                             }
                             Column(
                                 Modifier
