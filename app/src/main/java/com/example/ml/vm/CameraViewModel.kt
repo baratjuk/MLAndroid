@@ -17,7 +17,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import com.example.ml.businesLogic.MlFaceMashRecognizer
 import com.example.ml.businesLogic.MlObjectRecognizer
+import com.google.mlkit.vision.facemesh.FaceMesh
+import com.google.mlkit.vision.facemesh.FaceMesh.LEFT_EYE
+import com.google.mlkit.vision.facemesh.FaceMesh.RIGHT_EYE
 import com.google.mlkit.vision.objects.DetectedObject
 
 class CameraViewModel(val context : Context) {
@@ -70,6 +74,7 @@ class CameraViewModel(val context : Context) {
         get() = cameraSelectorMutable.value == CameraSelector.DEFAULT_FRONT_CAMERA
 
     private val mlObjectRecognizer : MlObjectRecognizer
+    private val mlFaceMashRecognizer : MlFaceMashRecognizer
     private val sensorManager : SensorManager
     private val gyroscope : Sensor
 
@@ -88,6 +93,23 @@ class CameraViewModel(val context : Context) {
                         label
                     )
                     mlObjectsInfoListMutable.add(mlObjInfo)
+                }
+            }
+        }
+        mlFaceMashRecognizer = object: MlFaceMashRecognizer() {
+            override fun on(list: List<FaceMesh>) {
+                mlObjectsInfoListMutable.clear()
+                list.forEach {
+                    val box = it.boundingBox
+//                    for(point in it.allPoints) {
+//                        Log.v(TAG, point.position.toString())
+//                    }
+                    for(point in it.getPoints(LEFT_EYE)) {
+                        Log.v(TAG, point.position.toString())
+                    }
+                    for(point in it.getPoints(RIGHT_EYE)) {
+                        Log.v(TAG, point.position.toString())
+                    }
                 }
             }
         }
@@ -114,7 +136,7 @@ class CameraViewModel(val context : Context) {
                     }
                 }
                 rotationDegreesMutable.value = degrees
-                Log.v(TAG, "gyroscope: " + degrees)
+//                Log.v(TAG, "gyroscope: " + degrees)
             }
         }, gyroscope, SensorManager.SENSOR_DELAY_NORMAL)
     }
@@ -123,7 +145,8 @@ class CameraViewModel(val context : Context) {
     fun updateImage(imageProxy : ImageProxy) {
         imageSize = Size(imageProxy.width.toFloat(), imageProxy.height.toFloat())
         imageProxy?.let {
-            mlObjectRecognizer.processImage(it)
+//            mlObjectRecognizer.processImage(it)
+            mlFaceMashRecognizer.processImage(it)
         }
 //        Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())
 //        Log.v(TAG, "imageProxy: " + scale)

@@ -25,7 +25,7 @@ abstract class MlFaceMashRecognizer {
 
     init {
         val optionsBuilder = FaceMeshDetectorOptions.Builder()
-        optionsBuilder.setUseCase(FaceMeshDetectorOptions.BOUNDING_BOX_ONLY)
+//        optionsBuilder.setUseCase(FaceMeshDetectorOptions.BOUNDING_BOX_ONLY)
         detector = FaceMeshDetection.getClient(optionsBuilder.build())
     }
 
