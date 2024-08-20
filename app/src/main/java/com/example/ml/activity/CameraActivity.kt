@@ -29,7 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PointMode
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
@@ -107,6 +110,12 @@ class CameraActivity : ComponentActivity() {
                                         )
                                     }
                                 }
+//                                drawPoints(points = cameraViewModel.mlFaceMashInfoListMutable.map { it.offset },
+//                                    color = Color.Black,
+//                                    strokeWidth = 4,
+//                                    strokeCap = StrokeCap.Round)
+                                val points: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.map { it.offset }
+                                drawPoints(points, PointMode.Points, Color.Red, 4f, StrokeCap.Round)
                             }
                             Column(
                                 Modifier

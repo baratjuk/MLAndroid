@@ -64,9 +64,13 @@ class CameraViewModel(val context : Context) {
         fun lines() = label.split("\n").size
     }
 
+    data class MlFaceMashInfo(val offset : Offset, val color: Color)
+
     var mlObjectsInfoListMutable = mutableListOf<MlObjectInfo>()
     var cameraSelectorMutable = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
     var rotationDegreesMutable = mutableStateOf(0f)
+
+    var mlFaceMashInfoListMutable = mutableListOf<MlFaceMashInfo>()
 
     var screenSize : Size? = null
     var imageSize : Size? = null
@@ -98,17 +102,25 @@ class CameraViewModel(val context : Context) {
         }
         mlFaceMashRecognizer = object: MlFaceMashRecognizer() {
             override fun on(list: List<FaceMesh>) {
-                mlObjectsInfoListMutable.clear()
+                mlFaceMashInfoListMutable.clear()
                 list.forEach {
                     val box = it.boundingBox
 //                    for(point in it.allPoints) {
 //                        Log.v(TAG, point.position.toString())
 //                    }
                     for(point in it.getPoints(LEFT_EYE)) {
-                        Log.v(TAG, point.position.toString())
+                        val mlInfo = MlFaceMashInfo(
+                            Offset(point.position.x, point.position.y),
+                            Color.Cyan
+                        )
+                        mlFaceMashInfoListMutable.add(mlInfo)
                     }
                     for(point in it.getPoints(RIGHT_EYE)) {
-                        Log.v(TAG, point.position.toString())
+                        val mlInfo = MlFaceMashInfo(
+                            Offset(point.position.x, point.position.y),
+                            Color.White
+                        )
+                        mlFaceMashInfoListMutable.add(mlInfo)
                     }
                 }
             }
