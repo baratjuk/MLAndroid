@@ -96,6 +96,7 @@ class CameraViewModel(val context : Context) {
     private val mlFaceMashRecognizer : MlFaceMashRecognizer
     private val sensorManager : SensorManager
     private val gyroscope : Sensor
+    private var separatorCount = 0
 
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
@@ -166,8 +167,10 @@ class CameraViewModel(val context : Context) {
     fun updateImage(imageProxy : ImageProxy) {
         imageSize = Size(imageProxy.width.toFloat(), imageProxy.height.toFloat())
         imageProxy?.let {
-//            mlObjectRecognizer.processImage(it)
-            mlFaceMashRecognizer.processImage(it)
+            when(separatorCount++ % 2) {
+                0 -> mlObjectRecognizer.processImage(it)
+                1 -> mlFaceMashRecognizer.processImage(it)
+            }
         }
 //        Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())
 //        Log.v(TAG, "imageProxy: " + scale)
