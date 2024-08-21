@@ -8,6 +8,7 @@ import android.hardware.Sensor.TYPE_ACCELEROMETER
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -96,7 +97,6 @@ class CameraViewModel(val context : Context) {
     private val mlFaceMashRecognizer : MlFaceMashRecognizer
     private val sensorManager : SensorManager
     private val gyroscope : Sensor
-    private var separatorCount = 0
 
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
@@ -124,14 +124,24 @@ class CameraViewModel(val context : Context) {
 //                    for(point in it.allPoints) {
 //                        Log.v(TAG, point.position.toString())
 //                    }
+                    var z1 = 0f
+                    var i1 = 0
                     for(point in it.getPoints(LEFT_EYE)) {
                         val mlInfo = MlFaceMashInfo(point.position, Types.LEFT_EYE)
                         mlFaceMashInfoListMutable.add(mlInfo)
+                        z1 += point.position.z
+                        i1++
                     }
+
+                    var z2 = 0f
+                    var i2 = 0
                     for(point in it.getPoints(RIGHT_EYE)) {
                         val mlInfo = MlFaceMashInfo(point.position, Types.RIGHT_EYE)
                         mlFaceMashInfoListMutable.add(mlInfo)
+                        z2 += point.position.z
+                        i2++
                     }
+                    Log.v(TAG, (z1/i1).toString() + " : " + (z2/i2).toString())
                 }
             }
         }
@@ -167,9 +177,10 @@ class CameraViewModel(val context : Context) {
     fun updateImage(imageProxy : ImageProxy) {
         imageSize = Size(imageProxy.width.toFloat(), imageProxy.height.toFloat())
         imageProxy?.let {
-            when(separatorCount++ % 2) {
-                0 -> mlObjectRecognizer.processImage(it)
-                1 -> mlFaceMashRecognizer.processImage(it)
+            mlObjectRecognizer.processImage(it) {
+                mlFaceMashRecognizer.processImage(it) { imageProxy ->
+                    imageProxy.close()
+                }
             }
         }
 //        Log.v(TAG, "imageProxy: " + imageProxy.width.toString() + " " + imageProxy.height.toString())

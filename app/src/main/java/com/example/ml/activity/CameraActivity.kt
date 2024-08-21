@@ -111,7 +111,7 @@ class CameraActivity : ComponentActivity() {
                                     }
                                 }
                                 val leftEyePoints: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.filter { it.type == CameraViewModel.Types.LEFT_EYE }.map { it.offset }
-                                drawPoints(leftEyePoints, PointMode.Points, Color.Yellow, 4f, StrokeCap.Round)
+                                drawPoints(leftEyePoints, PointMode.Polygon, Color.Yellow, 4f, StrokeCap.Round)
                                 val rightEyePoints: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.filter { it.type == CameraViewModel.Types.RIGHT_EYE }.map { it.offset }
                                 drawPoints(rightEyePoints, PointMode.Points, Color.Cyan, 4f, StrokeCap.Round)
                             }

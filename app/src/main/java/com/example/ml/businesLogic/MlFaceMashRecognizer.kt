@@ -30,7 +30,7 @@ abstract class MlFaceMashRecognizer {
     }
 
     @ExperimentalGetImage
-    fun processImage(image : ImageProxy) {
+    fun processImage(image : ImageProxy, exit: (image : ImageProxy)->Unit) {
         GlobalScope.launch(Dispatchers.Main) {
             val mlImage =
                 image.image?.let {
@@ -42,10 +42,10 @@ abstract class MlFaceMashRecognizer {
                 detector.process(it)
                     .addOnSuccessListener { result ->
                         on(result)
-                        image.close()
+                        exit(image)
                     }
                     .addOnFailureListener { e ->
-
+                        exit(image)
                     }
             }
         }
