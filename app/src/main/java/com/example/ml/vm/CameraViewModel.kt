@@ -85,6 +85,8 @@ class CameraViewModel(val context : Context) {
     var mlObjectsInfoListMutable = mutableListOf<MlObjectInfo>()
     var cameraSelectorMutable = mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
     var rotationDegreesMutable = mutableStateOf(0f)
+    var leftBlinkMutable = mutableStateOf(false)
+    var rightBlinkMutable = mutableStateOf(false)
 
     var mlFaceMashInfoListMutable = mutableListOf<MlFaceMashInfo>()
 
@@ -115,10 +117,6 @@ class CameraViewModel(val context : Context) {
                     mlObjectsInfoListMutable.add(mlObjInfo)
                 }
             }
-
-            override fun onBlink(left: Boolean, right: Boolean) {
-
-            }
         }
         mlFaceMashRecognizer = object: MlFaceMashRecognizer() {
             override fun onDetect(list: List<FaceMesh>) {
@@ -145,8 +143,13 @@ class CameraViewModel(val context : Context) {
                         z2 += point.position.z
                         i2++
                     }
-                    Log.v(TAG, (z1/i1).toString() + " : " + (z2/i2).toString())
+//                    Log.v(TAG, (z1/i1).toString() + " : " + (z2/i2).toString())
                 }
+            }
+
+            override fun onBlink(left: Boolean, right: Boolean) {
+                leftBlinkMutable.value = left
+                rightBlinkMutable.value = right
             }
         }
         sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager

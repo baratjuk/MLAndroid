@@ -16,7 +16,6 @@ abstract class MlObjectRecognizer {
     val TAG = "ML.MlObjectRecognizer"
 
     abstract fun onDetect(list: List<DetectedObject>)
-    abstract fun onBlink(left:Boolean, right:Boolean)
 
     private val objectDetector: ObjectDetector
     private val localModel: LocalModel
