@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 abstract class MlObjectRecognizer {
     val TAG = "ML.MlObjectRecognizer"
 
-    abstract fun on(list: List<DetectedObject>)
+    abstract fun onDetect(list: List<DetectedObject>)
+    abstract fun onBlink(left:Boolean, right:Boolean)
 
     private val objectDetector: ObjectDetector
     private val localModel: LocalModel
@@ -43,7 +44,7 @@ abstract class MlObjectRecognizer {
             mlImage?.let {
                 objectDetector.process(it)
                     .addOnSuccessListener { result ->
-                        on(result)
+                        onDetect(result)
                         exit(image)
                     }
                     .addOnFailureListener { e ->

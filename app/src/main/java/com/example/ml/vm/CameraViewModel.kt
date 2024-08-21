@@ -100,7 +100,7 @@ class CameraViewModel(val context : Context) {
 
     init {
         mlObjectRecognizer = object: MlObjectRecognizer() {
-            override fun on(list: List<DetectedObject>) {
+            override fun onDetect(list: List<DetectedObject>) {
                 mlObjectsInfoListMutable.clear()
                 list.forEach {
                     val box = it.boundingBox
@@ -115,9 +115,13 @@ class CameraViewModel(val context : Context) {
                     mlObjectsInfoListMutable.add(mlObjInfo)
                 }
             }
+
+            override fun onBlink(left: Boolean, right: Boolean) {
+
+            }
         }
         mlFaceMashRecognizer = object: MlFaceMashRecognizer() {
-            override fun on(list: List<FaceMesh>) {
+            override fun onDetect(list: List<FaceMesh>) {
                 mlFaceMashInfoListMutable.clear()
                 list.forEach {
                     val box = it.boundingBox
