@@ -38,10 +38,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.draw
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -90,6 +93,7 @@ class CameraActivity : ComponentActivity() {
                                 .fillMaxSize()
                                 .background(Color.Transparent)) {
                             val textMeasurer = rememberTextMeasurer()
+                            val painter = painterResource(id = R.drawable.ic_call_decline)
                             Canvas(
                                 modifier = Modifier
                                     .padding(horizontal = 0.dp)
@@ -124,6 +128,27 @@ class CameraActivity : ComponentActivity() {
                                 drawPoints(leftEyePoints, PointMode.Polygon, Color.Yellow, 4f, StrokeCap.Round)
                                 val rightEyePoints: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.filter { it.type == CameraViewModel.Types.RIGHT_EYE }.map { it.offset }
                                 drawPoints(rightEyePoints, PointMode.Points, Color.Cyan, 4f, StrokeCap.Round)
+
+                                if(!cameraViewModel.leftBlinkMutable.value) {
+                                    translate(left = 200f, top = 100f) {
+                                        with(painter) {
+                                            draw(
+                                                painter.intrinsicSize,
+                                                colorFilter = ColorFilter.tint(Color.White)
+                                            )
+                                        }
+                                    }
+                                }
+                                if(!cameraViewModel.rightBlinkMutable.value) {
+                                    translate(left = 100f, top = 100f) {
+                                        with(painter) {
+                                            draw(
+                                                size = painter.intrinsicSize,
+                                                colorFilter = ColorFilter.tint(Color.White)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                             Column(
                                 Modifier
@@ -143,38 +168,6 @@ class CameraActivity : ComponentActivity() {
                                         contentColor = Color.White,
                                         containerColor = Color.Black
                                     )
-                                )
-                            }
-                            val painter = painterResource(id = R.drawable.ic_call_decline)
-                            Row(
-                                Modifier
-                                    .align(Alignment.TopCenter)
-                            ) {
-                                Icon(
-                                    painter = painter,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .graphicsLayer(
-                                            rotationZ = if(cameraViewModel.leftBlinkMutable.value) 90f else 0f,
-                                        )
-                                )
-
-                                HorizontalDivider(
-                                    color = Color.Transparent,
-                                    modifier = Modifier.width(24.dp)
-                                )
-
-                                Icon(
-                                    painter = painter,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .graphicsLayer(
-                                            rotationZ = if(cameraViewModel.rightBlinkMutable.value) 90f else 0f
-                                        )
                                 )
                             }
                         }

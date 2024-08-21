@@ -22,6 +22,8 @@ abstract class MlFaceMashRecognizer {
     abstract fun onBlink(left:Boolean, right:Boolean)
 
     private val detector: FaceMeshDetector
+    private var leftCount = 0
+    private var rightCount = 0
 
     init {
         val optionsBuilder = FaceMeshDetectorOptions.Builder()
@@ -53,11 +55,32 @@ abstract class MlFaceMashRecognizer {
     }
 
     fun detectClip(list: List<FaceMesh>) {
+        val minTimes = 0
+        val threshold = 4.0f
         list.firstOrNull()?.let {
+            var left = false
             val leftK = blinkCoefficient(it.getPoints(LEFT_EYE))
+            if(leftK > threshold) {
+                leftCount++
+                left = leftCount > minTimes
+            } else {
+                leftCount = 0
+            }
             val rightK = blinkCoefficient(it.getPoints(RIGHT_EYE))
+            var right = false
+            if(rightK > threshold) {
+                rightCount++
+                right = rightCount > minTimes
+            } else {
+                rightCount = 0
+            }
             Log.v(TAG, "LEFT: " + leftK + "RIGHT: " + rightK)
-            onBlink(leftK > 5f, rightK > 5f)
+//            if((left && !right) || (!left && right)) {
+//                onBlink(left, right)
+//            } else {
+//                onBlink(false, false)
+//            }
+            onBlink(left, right)
         }
     }
 
