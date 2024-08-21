@@ -100,30 +100,30 @@ class CameraActivity : ComponentActivity() {
                                     .fillMaxSize()
                             ) {
                                 cameraViewModel.screenSize = size
-                                cameraViewModel.mlObjectsInfoListMutable.forEachIndexed { index, item ->
-                                    drawRect(
-                                        color = item.color(index),
-                                        size = item.size,
-                                        topLeft = item.offset,
-                                        style = Stroke(
-                                            width = 2f
-                                        )
-                                    )
-                                    val style = TextStyle(
-                                        fontSize = 18.sp,
-                                        color = item.color(index),
-                                        background = Color.Transparent
-                                    )
-                                    rotate(degrees = cameraViewModel.rotationDegreesMutable.value, item.textOffset) {
-                                        drawText(
-                                            textMeasurer = textMeasurer,
-                                            text = item.label,
-                                            style = style,
-                                            topLeft = item.textOffset,
-                                            maxLines = item.lines()
-                                        )
-                                    }
-                                }
+//                                cameraViewModel.mlObjectsInfoListMutable.forEachIndexed { index, item ->
+//                                    drawRect(
+//                                        color = item.color(index),
+//                                        size = item.size,
+//                                        topLeft = item.offset,
+//                                        style = Stroke(
+//                                            width = 2f
+//                                        )
+//                                    )
+//                                    val style = TextStyle(
+//                                        fontSize = 18.sp,
+//                                        color = item.color(index),
+//                                        background = Color.Transparent
+//                                    )
+//                                    rotate(degrees = cameraViewModel.rotationDegreesMutable.value, item.textOffset) {
+//                                        drawText(
+//                                            textMeasurer = textMeasurer,
+//                                            text = item.label,
+//                                            style = style,
+//                                            topLeft = item.textOffset,
+//                                            maxLines = item.lines()
+//                                        )
+//                                    }
+//                                }
                                 val leftEyePoints: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.filter { it.type == CameraViewModel.Types.LEFT_EYE }.map { it.offset }
                                 drawPoints(leftEyePoints, PointMode.Polygon, Color.Yellow, 4f, StrokeCap.Round)
                                 val rightEyePoints: List<Offset> = cameraViewModel.mlFaceMashInfoListMutable.filter { it.type == CameraViewModel.Types.RIGHT_EYE }.map { it.offset }
