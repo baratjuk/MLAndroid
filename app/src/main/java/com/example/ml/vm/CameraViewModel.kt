@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.ViewModel
 import com.example.ml.businesLogic.MlFaceMashRecognizer
 import com.example.ml.businesLogic.MlObjectRecognizer
 import com.google.mlkit.vision.common.PointF3D
@@ -25,7 +26,7 @@ import com.google.mlkit.vision.facemesh.FaceMesh.LEFT_EYE
 import com.google.mlkit.vision.facemesh.FaceMesh.RIGHT_EYE
 import com.google.mlkit.vision.objects.DetectedObject
 
-class CameraViewModel(val context : Context) {
+class CameraViewModel(val context : Context) : ViewModel() {
     val TAG = "ML.CameraViewModel"
 
     inner class MlObjectInfo(rect : Rect, val label: String) {
