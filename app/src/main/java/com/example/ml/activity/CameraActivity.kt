@@ -134,7 +134,7 @@ class CameraActivity : ComponentActivity() {
                                         with(painter) {
                                             draw(
                                                 painter.intrinsicSize,
-                                                colorFilter = ColorFilter.tint(Color.White)
+                                                colorFilter = ColorFilter.tint(Color.Yellow)
                                             )
                                         }
                                     }
@@ -144,7 +144,7 @@ class CameraActivity : ComponentActivity() {
                                         with(painter) {
                                             draw(
                                                 size = painter.intrinsicSize,
-                                                colorFilter = ColorFilter.tint(Color.White)
+                                                colorFilter = ColorFilter.tint(Color.Cyan)
                                             )
                                         }
                                     }
