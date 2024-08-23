@@ -1,6 +1,7 @@
 package com.example.ml.activity
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
@@ -86,6 +87,7 @@ class CameraActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val context = LocalContext.current
                     Box {
                         CameraPreview()
                         Box(
@@ -169,6 +171,19 @@ class CameraActivity : ComponentActivity() {
                                         containerColor = Color.Black
                                     )
                                 )
+                                Button(
+                                    onClick = {
+                                        runItemActivity(context, Camera2Activity::class.java)
+                                    },
+                                    modifier = Modifier
+                                        .padding(end = 16.dp),
+                                    content = {
+                                        Text("Camera2") },
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = Color.White,
+                                        containerColor = Color.Black
+                                    )
+                                )
                             }
                         }
                     }
@@ -231,4 +246,9 @@ class CameraActivity : ComponentActivity() {
             }
         }, ContextCompat.getMainExecutor(context))
     }
+}
+
+fun runItemActivity(context : Context, cls: Class<*>) {
+    val intent = Intent(context, cls)
+    context.startActivity(intent)
 }
