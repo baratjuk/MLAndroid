@@ -51,14 +51,17 @@ class Camera2Activity : ComponentActivity() {
     private lateinit var cameraDevice: CameraDevice
     private lateinit var cameraExtensionSession: CameraExtensionSession
     private lateinit var previewSurface: Surface
+    private var currentExtension = 0
 
     private fun initializeCamera() = lifecycleScope.launch(Dispatchers.IO) {
         // Open the selected camera
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             cameraDevice = openCamera(cameraManager, cameraId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                startPreview()
+            }
         }
 
-        startPreview()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,7 +152,7 @@ class Camera2Activity : ComponentActivity() {
 //        outputConfig.add(OutputConfiguration(stillImageReader.surface))
         outputConfig.add(OutputConfiguration(previewSurface))
         val extensionConfiguration = ExtensionSessionConfiguration(
-            0, outputConfig,
+            currentExtension, outputConfig,
             Dispatchers.IO.asExecutor(), object : CameraExtensionSession.StateCallback() {
                 override fun onClosed(session: CameraExtensionSession) {
                     cameraDevice.close()
