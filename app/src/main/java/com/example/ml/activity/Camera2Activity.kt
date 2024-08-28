@@ -95,8 +95,6 @@ class Camera2Activity : ComponentActivity() {
             override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
             }
         }
-
-//        initializeCamera()
     }
 
     override fun onDestroy() {
@@ -162,8 +160,7 @@ class Camera2Activity : ComponentActivity() {
                     cameraExtensionSession = session
                     submitRequest(
                         CameraDevice.TEMPLATE_PREVIEW,
-                        previewSurface,
-                        true
+                        previewSurface
                     ) { request ->
                         request.apply {
                             set(CaptureRequest.CONTROL_ZOOM_RATIO, 1f)
@@ -201,7 +198,6 @@ class Camera2Activity : ComponentActivity() {
     private fun submitRequest(
         templateType: Int,
         targets: List<Surface>,
-        isRepeating: Boolean,
         block: (captureRequest: CaptureRequest.Builder) -> CaptureRequest.Builder) {
         try {
             val captureBuilder = cameraDevice.createCaptureRequest(templateType)
@@ -211,19 +207,11 @@ class Camera2Activity : ComponentActivity() {
                     }
                     block(this)
                 }
-            if (isRepeating) {
-                cameraExtensionSession.setRepeatingRequest(
-                    captureBuilder.build(),
-                    Dispatchers.IO.asExecutor(),
-                    captureCallbacks
-                )
-            } else {
-                cameraExtensionSession.capture(
-                    captureBuilder.build(),
-                    Dispatchers.IO.asExecutor(),
-                    captureCallbacks
-                )
-            }
+            cameraExtensionSession.setRepeatingRequest(
+                captureBuilder.build(),
+                Dispatchers.IO.asExecutor(),
+                captureCallbacks
+            )
         } catch (e: CameraAccessException) {
             Log.v(TAG, "Camera failed to submit capture request!.")
         }
@@ -233,16 +221,16 @@ class Camera2Activity : ComponentActivity() {
     private fun submitRequest(
         templateType: Int,
         target: Surface,
-        isRepeating: Boolean,
         block: (captureRequest: CaptureRequest.Builder) -> CaptureRequest.Builder) {
-        return submitRequest(templateType, listOf(target), isRepeating, block)
+        return submitRequest(templateType, listOf(target), block)
     }
 
     private val captureCallbacks: CameraExtensionSession.ExtensionCaptureCallback =
         @RequiresApi(Build.VERSION_CODES.S)
         object : CameraExtensionSession.ExtensionCaptureCallback() {
             override fun onCaptureStarted(
-                session: CameraExtensionSession, request: CaptureRequest,
+                session: CameraExtensionSession,
+                request: CaptureRequest,
                 timestamp: Long
             ) {
                 Log.v(TAG, "onCaptureStarted ts: $timestamp")
@@ -253,8 +241,6 @@ class Camera2Activity : ComponentActivity() {
                 request: CaptureRequest
             ) {
                 Log.v(TAG, "onCaptureProcessStarted")
-                // Turns to STILL_PROCESSING stage when the request tag is STILL_CAPTURE_TAG
-
             }
 
             override fun onCaptureResultAvailable(
@@ -294,4 +280,6 @@ class Camera2Activity : ComponentActivity() {
                 Log.v(TAG, "onCaptureProcessProgressed: $progress")
             }
         }
+
+
 }
