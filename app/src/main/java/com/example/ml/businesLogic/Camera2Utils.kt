@@ -1,6 +1,7 @@
 package com.example.ml.businesLogic
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Point
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraAccessException
@@ -18,7 +19,7 @@ class Camera2Utils {
     companion object {
         @RequiresApi(Build.VERSION_CODES.S)
         @Throws(CameraAccessException::class)
-        public fun pickPreviewResolution(context: Activity, manager: CameraManager, cameraId: String) : Size {
+        public fun pickPreviewResolution(context: Context, manager: CameraManager, cameraId: String) : Size {
             val characteristics = manager.getCameraCharacteristics(cameraId)
             val map = characteristics.get(
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
@@ -52,7 +53,6 @@ class Camera2Utils {
                     context, "Invalid preview extension sizes!.",
                     Toast.LENGTH_SHORT
                 ).show()
-                context.finish()
             }
 
             var previewSize = extensionSizes[0]

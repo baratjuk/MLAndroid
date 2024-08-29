@@ -151,6 +151,7 @@ class CameraViewModel(val context : Context) : ViewModel() {
             override fun onBlink(left: Boolean, right: Boolean) {
                 leftBlinkMutable.value = left
                 rightBlinkMutable.value = right
+//                Log.v(TAG, left.toString() + " " + right.toString())
             }
         }
         sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
