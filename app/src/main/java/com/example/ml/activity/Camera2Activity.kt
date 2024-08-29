@@ -31,6 +31,9 @@ class Camera2Activity : ComponentActivity() {
         binding = ActivityCamera2Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.texture.scaleX = 1.0f
+        binding.texture.scaleY = 0.7f
+
         camera2ViewModel = object : Camera2ViewModel(this, binding.texture) {
             override fun onClose() {
 

@@ -6,6 +6,7 @@ import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraCaptureSession
+import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
@@ -14,6 +15,7 @@ import android.hardware.camera2.params.OutputConfiguration
 import android.hardware.camera2.params.SessionConfiguration
 import android.media.Image
 import android.media.ImageReader
+import android.media.MediaRecorder
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
@@ -23,6 +25,7 @@ import android.view.Surface
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import androidx.annotation.RequiresApi
+import androidx.camera.core.ImageProxy
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import com.google.mlkit.vision.common.InputImage
@@ -57,6 +60,7 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
 
     init {
         cameraManager = context.applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        printCamerasInfo()
     }
 
     fun open(cameraId : String) {
@@ -77,19 +81,29 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
     @RequiresApi(Build.VERSION_CODES.P)
     private fun openCameraAndStartPreview(cameraId : String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            previewSize = Camera2Utils.pickPreviewResolution(context, cameraManager, cameraId)
+//            previewSize = Camera2Utils.pickPreviewResolution(context, cameraManager, cameraId)
+            previewSize = Size(3648, 2736)
         } else {
             previewSize = Size(480, 320)
         }
         GlobalScope.launch(Dispatchers.IO) {
             cameraDevice = openCamera(cameraManager, cameraId)
-            imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.YUV_420_888, 1)
+            imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.YUV_420_888, 1) // YUV_420_888
             MainScope().launch {
                 startPreview()
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
-                    val cropedImage = cropImage_YUV_420_888(image, Rect(0,0,640, 480), 90)
-                    Log.v(com.example.ml.businesLogic.TAG, cropedImage?.width.toString() + "x" + cropedImage?.height.toString()+ " " + cropedImage?.format.toString())
+                    Log.v(com.example.ml.businesLogic.TAG,
+                        image?.width.toString()
+                                + "x"
+                                + image?.height.toString()
+                                + " "
+                                + image?.format.toString()
+                                + " "
+                                + image?.planes?.size
+                    )
+
+//                    val cropedImage = cropImage_YUV_420_888(image, Rect(0,0,480, 640), 90)
 //                    Log.v(TAG, Thread.currentThread().name)
                     image.close()
                 }, imageReaderHandler)
@@ -188,5 +202,38 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
             }
         }
         return croppedArray
+    }
+
+    fun printCamerasInfo() {
+        var backMaxResolution = mutableMapOf<String, Size>()
+        var frontMaxResolution = mutableMapOf<String, Size>()
+        cameraManager.cameraIdList.forEach { id ->
+            val characteristics = cameraManager.getCameraCharacteristics(id)
+            val orientation = characteristics.get(CameraCharacteristics.LENS_FACING)!!
+            val cameraConfig = characteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+            val targetClass = MediaRecorder::class.java
+            cameraConfig.getOutputSizes(targetClass).forEach { size ->
+                // Get the number of seconds that each frame will take to process
+                val secondsPerFrame =
+                    cameraConfig.getOutputMinFrameDuration(targetClass, size) /
+                            1_000_000_000.0
+                // Compute the frames per second to let user select a configuration
+                val fps = if (secondsPerFrame > 0) (1.0 / secondsPerFrame).toInt() else 0
+                val fpsLabel = if (fps > 0) "$fps" else "N/A"
+
+                when (orientation) {
+                    CameraCharacteristics.LENS_FACING_BACK -> {
+                        backMaxResolution.put(id, size)
+                    }
+                    CameraCharacteristics.LENS_FACING_FRONT -> {
+                        frontMaxResolution.put(id, size)
+                    }
+                    CameraCharacteristics.LENS_FACING_EXTERNAL -> {
+                    }
+                }
+                Log.v(TAG,"$orientation ($id) $size $fpsLabel FPS")
+            }
+        }
     }
 }
