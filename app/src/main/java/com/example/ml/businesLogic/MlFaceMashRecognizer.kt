@@ -37,6 +37,7 @@ abstract class MlFaceMashRecognizer {
         GlobalScope.launch(Dispatchers.Main) {
             val mlImage =
                 image.image?.let {
+//                    Log.v(com.example.ml.businesLogic.TAG, image.width.toString() + "x" + image.height.toString()+ " " + image.format.toString())
                     MediaMlImageBuilder(it)
                         .setRotation(image.imageInfo.rotationDegrees)
                         .build()

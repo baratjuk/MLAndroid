@@ -3,6 +3,7 @@ package com.example.ml.businesLogic
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.ImageFormat
+import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraDevice
@@ -11,6 +12,7 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.OutputConfiguration
 import android.hardware.camera2.params.SessionConfiguration
+import android.media.Image
 import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
@@ -23,6 +25,8 @@ import android.view.TextureView.SurfaceTextureListener
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.common.InputImage.IMAGE_FORMAT_NV21
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
@@ -75,17 +79,18 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             previewSize = Camera2Utils.pickPreviewResolution(context, cameraManager, cameraId)
         } else {
-            previewSize = Size(480, 640)
+            previewSize = Size(480, 320)
         }
         GlobalScope.launch(Dispatchers.IO) {
             cameraDevice = openCamera(cameraManager, cameraId)
-            imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.JPEG, 1)
+            imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.YUV_420_888, 1)
             MainScope().launch {
                 startPreview()
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
-                    Log.v(TAG, image.width.toString() + "x" + image.height.toString())
-                    Log.v(TAG, Thread.currentThread().name)
+                    val cropedImage = cropImage_YUV_420_888(image, Rect(0,0,640, 480), 90)
+                    Log.v(com.example.ml.businesLogic.TAG, cropedImage?.width.toString() + "x" + cropedImage?.height.toString()+ " " + cropedImage?.format.toString())
+//                    Log.v(TAG, Thread.currentThread().name)
                     image.close()
                 }, imageReaderHandler)
             }
@@ -145,5 +150,43 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
             }
         )
         cameraDevice.createCaptureSession(sessionConfig)
+    }
+
+    fun cropImage_YUV_420_888(mediaImage: Image, cropRect : Rect, rotation: Int) : Image? {
+        croppedNV21(mediaImage, cropRect).let { byteArray ->
+            val inputImage = InputImage.fromByteArray(
+                byteArray,
+                cropRect.width(),
+                cropRect.height(),
+                rotation,
+                ImageFormat.NV21,
+            )
+            return inputImage.mediaImage
+        }
+    }
+
+    private fun croppedNV21(mediaImage: Image, cropRect: Rect): ByteArray {
+        val yBuffer = mediaImage.planes[0].buffer // Y
+        val vuBuffer = mediaImage.planes[2].buffer // VU
+        val ySize = yBuffer.remaining()
+        val vuSize = vuBuffer.remaining()
+        val nv21 = ByteArray(ySize + vuSize)
+        yBuffer.get(nv21, 0, ySize)
+        vuBuffer.get(nv21, ySize, vuSize)
+        return cropByteArray(nv21, mediaImage.width, cropRect)
+    }
+
+    private fun cropByteArray(array: ByteArray, imageWidth: Int, cropRect: Rect): ByteArray {
+        val croppedArray = ByteArray(cropRect.width() * cropRect.height())
+        var i = 0
+        array.forEachIndexed { index, byte ->
+            val x = index % imageWidth
+            val y = index / imageWidth
+            if (cropRect.left <= x && x < cropRect.right && cropRect.top <= y && y < cropRect.bottom) {
+                croppedArray[i] = byte
+                i++
+            }
+        }
+        return croppedArray
     }
 }
