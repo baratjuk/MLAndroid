@@ -22,6 +22,7 @@ import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-public abstract class Camera2ViewModel(val context : Context, val textureView: TextureView) {
+public abstract class Camera2ViewModel(val context : Context, val textureView: TextureView) : ViewModel() {
 
     enum class ErrorTypes(i : Int) {
         Camera(0)
@@ -84,6 +85,7 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
                     Log.v(TAG, image.width.toString() + "x" + image.height.toString())
+                    Log.v(TAG, Thread.currentThread().name)
                     image.close()
                 }, imageReaderHandler)
             }
@@ -124,12 +126,11 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
         previewRequestBuilder.addTarget(previewSurface)
         previewRequestBuilder.addTarget(imageReader.surface)
-
         val outputConfig = OutputConfiguration(previewSurface)
-        val outputConfig1 = OutputConfiguration(imageReader.surface)
+        val outputImageReaderConfig = OutputConfiguration(imageReader.surface)
         val sessionConfig = SessionConfiguration(
             SessionConfiguration.SESSION_REGULAR,
-            listOf(outputConfig, outputConfig1),
+            listOf(outputConfig, outputImageReaderConfig),
             ContextCompat.getMainExecutor(context),
             object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(session: CameraCaptureSession) {
@@ -143,8 +144,6 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                 }
             }
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            cameraDevice.createCaptureSession(sessionConfig)
-        }
+        cameraDevice.createCaptureSession(sessionConfig)
     }
 }
