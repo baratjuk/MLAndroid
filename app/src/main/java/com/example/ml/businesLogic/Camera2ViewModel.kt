@@ -14,6 +14,7 @@ import android.hardware.camera2.params.SessionConfiguration
 import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
 import android.view.Surface
@@ -46,6 +47,8 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
     private lateinit var captureSession: CameraCaptureSession
     private lateinit var imageReader: ImageReader
     private lateinit var previewSize: Size
+    private val imageReaderThread = HandlerThread("imageReaderThread").apply { start() }
+    private val imageReaderHandler = Handler(imageReaderThread.looper)
 
     init {
         cameraManager = context.applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -75,8 +78,14 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         }
         GlobalScope.launch(Dispatchers.IO) {
             cameraDevice = openCamera(cameraManager, cameraId)
+            imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.JPEG, 1)
             MainScope().launch {
                 startPreview()
+                imageReader.setOnImageAvailableListener({ reader ->
+                    val image = reader.acquireLatestImage()
+                    Log.v(TAG, image.width.toString() + "x" + image.height.toString())
+                    image.close()
+                }, imageReaderHandler)
             }
         }
     }
@@ -114,10 +123,13 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         previewSurface = Surface(texture)
         previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
         previewRequestBuilder.addTarget(previewSurface)
+        previewRequestBuilder.addTarget(imageReader.surface)
+
         val outputConfig = OutputConfiguration(previewSurface)
+        val outputConfig1 = OutputConfiguration(imageReader.surface)
         val sessionConfig = SessionConfiguration(
             SessionConfiguration.SESSION_REGULAR,
-            listOf(outputConfig),
+            listOf(outputConfig, outputConfig1),
             ContextCompat.getMainExecutor(context),
             object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(session: CameraCaptureSession) {
@@ -134,28 +146,5 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             cameraDevice.createCaptureSession(sessionConfig)
         }
-    }
-
-    fun captureStillPicture() {
-        imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.JPEG, 1)
-        imageReader.setOnImageAvailableListener({ reader ->
-            val image = reader.acquireLatestImage()
-            // Process the image here
-            image.close()
-        }, null)
-        val captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
-        captureBuilder.addTarget(imageReader.surface)
-
-        // Orientation
-        captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, 90)
-
-        val captureCallback = object : CameraCaptureSession.CaptureCallback() {
-            override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
-                super.onCaptureCompleted(session, request, result)
-            }
-        }
-
-        captureSession.stopRepeating()
-        captureSession.capture(captureBuilder.build(), captureCallback, null)
     }
 }

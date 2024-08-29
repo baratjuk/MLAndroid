@@ -43,7 +43,7 @@ class Camera2Activity : ComponentActivity() {
         camera2ViewModel.open("1")
 
         binding.button1.setOnClickListener {
-            camera2ViewModel.captureStillPicture()
+
         }
     }
 
