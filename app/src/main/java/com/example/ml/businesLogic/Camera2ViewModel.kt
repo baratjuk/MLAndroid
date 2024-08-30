@@ -55,7 +55,9 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
 
     init {
         cameraManager = context.applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        Utils.printCamerasInfo(cameraManager)
+        Utils.cameraInfoList(cameraManager).forEach {
+            Log.v(TAG, "${it.orientationStr} ${it.id} ${it.size} ${it.fps}")
+        }
     }
 
     fun open(cameraId : String) {

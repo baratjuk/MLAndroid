@@ -8,10 +8,16 @@ import android.util.Log
 import android.util.Size
 
 class Utils {
+    data class CameraInfo(
+        val orientation: Int,
+        val orientationStr: String,
+        val id: String,
+        val size: Size,
+        val fps: Int)
+
     companion object {
-        fun printCamerasInfo(cameraManager: CameraManager) {
-            var backMaxResolution = mutableMapOf<String, Size>()
-            var frontMaxResolution = mutableMapOf<String, Size>()
+        fun cameraInfoList(cameraManager: CameraManager) : List<CameraInfo> {
+            var infoList = mutableListOf<CameraInfo>()
             cameraManager.cameraIdList.forEach { id ->
                 val characteristics = cameraManager.getCameraCharacteristics(id)
                 val orientation = characteristics.get(CameraCharacteristics.LENS_FACING)!!
@@ -19,17 +25,16 @@ class Utils {
                     CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
                 val targetClass = MediaRecorder::class.java
                 cameraConfig.getOutputSizes(targetClass).forEach { size ->
-                    // Get the number of seconds that each frame will take to process
                     val secondsPerFrame =
                         cameraConfig.getOutputMinFrameDuration(targetClass, size) /
                                 1_000_000_000.0
-                    // Compute the frames per second to let user select a configuration
                     val fps = if (secondsPerFrame > 0) (1.0 / secondsPerFrame).toInt() else 0
-                    val fpsLabel = if (fps > 0) "$fps" else "N/A"
                     val orientationStr = lensOrientationString(orientation)
-                    Log.v(TAG,"$orientationStr ($id) $size $fpsLabel FPS")
+                    val cameraInfo = CameraInfo(orientation, orientationStr, id, size, fps)
+                    infoList.add(cameraInfo)
                 }
             }
+            return infoList
         }
 
         fun cameraMaxResolution(cameraManager: CameraManager, cameraId: String) : Size {
@@ -37,7 +42,6 @@ class Utils {
             var max = 0
             cameraManager.cameraIdList.forEach { id ->
                 val characteristics = cameraManager.getCameraCharacteristics(id)
-                val orientation = characteristics.get(CameraCharacteristics.LENS_FACING)!!
                 val cameraConfig = characteristics.get(
                     CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
                 val targetClass = MediaRecorder::class.java
