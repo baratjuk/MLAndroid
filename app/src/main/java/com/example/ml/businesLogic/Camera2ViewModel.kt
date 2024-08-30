@@ -39,11 +39,12 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         Camera(0)
     }
 
+    abstract fun onOpen(previewSize: Size)
     abstract fun onClose()
     abstract fun onError(type: ErrorTypes, code: Int)
 
     private val cameraManager: CameraManager
-    lateinit var previewSize: Size
+    private lateinit var previewSize: Size
     private lateinit var cameraDevice: CameraDevice
     private lateinit var previewRequestBuilder: CaptureRequest.Builder
     private lateinit var previewRequest: CaptureRequest
@@ -65,6 +66,7 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
             override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     openCameraAndStartPreview(cameraId)
+                    onOpen(previewSize)
                 }
             }
             override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
@@ -77,9 +79,6 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
 
     @RequiresApi(Build.VERSION_CODES.P)
     private fun openCameraAndStartPreview(cameraId : String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            previewSize = Camera2Utils.pickPreviewResolution(context, cameraManager, cameraId)
-        }
         previewSize = Utils.cameraMaxResolution(cameraManager, cameraId)
         GlobalScope.launch(Dispatchers.IO) {
             cameraDevice = openCamera(cameraManager, cameraId)

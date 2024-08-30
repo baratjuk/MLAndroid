@@ -4,8 +4,12 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.MediaRecorder
-import android.util.Log
+import android.os.Build
 import android.util.Size
+import android.view.WindowManager
+import android.view.WindowMetrics
+import androidx.annotation.RequiresApi
+
 
 class Utils {
     data class CameraInfo(
@@ -56,6 +60,18 @@ class Utils {
                 }
             }
             return maxResolution
+        }
+
+        @RequiresApi(Build.VERSION_CODES.R)
+        fun yScale(context: Context, pictureSize: Size): Float {
+            val metrics: WindowMetrics =
+                context.getSystemService(WindowManager::class.java).getCurrentWindowMetrics()
+            val screenWidth = metrics.bounds.width()
+            val screenHeight = metrics.bounds.height()
+            val screenAspectRatio = screenHeight.toFloat() /screenWidth.toFloat()
+            val pictureAspectRatio = pictureSize.width.toFloat() / pictureSize.height.toFloat()
+            val scale = pictureAspectRatio / screenAspectRatio
+            return scale
         }
     }
 }
