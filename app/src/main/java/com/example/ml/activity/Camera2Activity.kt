@@ -26,10 +26,6 @@ class Camera2Activity : ComponentActivity() {
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
-        if (!allRuntimePermissionsGranted(this)) {
-            getRuntimePermissions(this)
-        }
-
         binding = ActivityCamera2Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
