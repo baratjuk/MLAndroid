@@ -66,6 +66,7 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
     private val imageReaderHandler = Handler(imageReaderThread.looper)
     private val mlObjectRecognizer : MlObjectRecognizer
     private var isBusy = false
+    private lateinit var centralRect: Rect
 
     init {
         cameraManager = context.applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -106,6 +107,9 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
     @RequiresApi(Build.VERSION_CODES.P)
     private fun openCameraAndStartPreview(cameraId : String) {
         previewSize = Utils.cameraMaxResolution(cameraManager, cameraId)
+        val centerX = previewSize.width/2
+        val centerY = previewSize.height/2
+        centralRect = Rect(centerX - 240, centerY - 320, centerX + 240, centerY + 320)
         GlobalScope.launch(Dispatchers.IO) {
             cameraDevice = openCamera(cameraManager, cameraId)
             imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, ImageFormat.YUV_420_888, 1) // YUV_420_888
@@ -113,19 +117,19 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                 startPreview()
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
-                    val cropedBitmap = cropImage_YUV_420_888(image, Rect(0,0,480, 640))
+                    val cropedBitmap = cropImage_YUV_420_888(image, centralRect)
                     image.close()
                     if(isBusy) {
                         return@setOnImageAvailableListener
                     }
                     isBusy = true
-                    rotateBitmap(cropedBitmap, 90f).let { // 270 - front, 90 - back
-                        MainScope().launch {
-                            onBitmap(it)
-                        }
+                    val rotatedBitmap = rotateBitmap(cropedBitmap, 270f) // 270 - front, 90 - back
+                    MainScope().launch {
+                        onBitmap(rotatedBitmap)
+                        cropedBitmap.recycle()
                     }
-                    val cropedInputImage = InputImage.fromBitmap(cropedBitmap, 0)
-                    mlObjectRecognizer.processImage(cropedInputImage) {
+                    val cropedRotatedInputImage = InputImage.fromBitmap(rotatedBitmap, 0)
+                    mlObjectRecognizer.processImage(cropedRotatedInputImage) {
                         isBusy = false
                     }
                 }, imageReaderHandler)
@@ -200,7 +204,8 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         val outputStream = ByteArrayOutputStream()
         yuvImage.compressToJpeg(cropRect, 100, outputStream)
         val imageBytes = outputStream.toByteArray()
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val cropedBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        return cropedBitmap
     }
 
     private fun rotateBitmap(bitmap: Bitmap, rotationAngle: Float): Bitmap {

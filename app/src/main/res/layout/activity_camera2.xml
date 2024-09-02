@@ -12,14 +12,11 @@
         android:id="@+id/texture"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
     <ImageView
+        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:id="@+id/image1"
-        android:layout_width="480px"
+        android:layout_width="640px"
         android:layout_height="640px"/>
 </RelativeLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>
