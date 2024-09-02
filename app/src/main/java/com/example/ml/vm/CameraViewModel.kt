@@ -185,7 +185,7 @@ class CameraViewModel(val context : Context) : ViewModel() {
     @OptIn(ExperimentalGetImage::class)
     fun updateImage(imageProxy : ImageProxy) {
         imageSize = Size(imageProxy.width.toFloat(), imageProxy.height.toFloat())
-//        Log.v(TAG, imageSize.toString())
+//        Log.v(TAG, imageSize?.width.toString())
         imageProxy?.let {
             mlObjectRecognizer.processImage(it) {
                 mlFaceMashRecognizer.processImage(it) { imageProxy ->

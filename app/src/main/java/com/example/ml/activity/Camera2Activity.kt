@@ -53,7 +53,7 @@ class Camera2Activity : ComponentActivity() {
             }
         }
         binding.texture.scaleX = 1.0f
-        camera2ViewModel.open("1")
+        camera2ViewModel.open("0")
 
         binding.button1.setOnClickListener {
             finish()

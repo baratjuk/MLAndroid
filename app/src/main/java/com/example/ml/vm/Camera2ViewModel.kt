@@ -26,8 +26,10 @@ import android.view.Surface
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import androidx.annotation.RequiresApi
+import androidx.camera.core.ExperimentalGetImage
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import com.example.ml.businesLogic.MlObjectRecognizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
@@ -39,6 +41,7 @@ import kotlin.coroutines.resume
 import com.example.ml.businesLogic.TAG
 import com.example.ml.businesLogic.Utils
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.objects.DetectedObject
 
 public abstract class Camera2ViewModel(val context : Context, val textureView: TextureView) : ViewModel() {
 
@@ -61,11 +64,25 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
     private lateinit var imageReader: ImageReader
     private val imageReaderThread = HandlerThread("imageReaderThread").apply { start() }
     private val imageReaderHandler = Handler(imageReaderThread.looper)
+    private val mlObjectRecognizer : MlObjectRecognizer
+    private var isBusy = false
 
     init {
         cameraManager = context.applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         Utils.cameraInfoList(cameraManager).forEach {
             Log.v(TAG, "${it.orientationStr} ${it.id} ${it.size} ${it.fps}")
+        }
+        mlObjectRecognizer = object: MlObjectRecognizer() {
+            override fun onDetect(list: List<DetectedObject>) {
+                list.forEach {
+                    val box = it.boundingBox
+                    val label = it.labels.sortedBy { it.confidence }
+                        .joinToString(separator = "\n", transform = {
+                            it.text + " " + it.index
+                        })
+                    Log.v(TAG, label)
+                }
+            }
         }
     }
 
@@ -85,6 +102,7 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         }
     }
 
+    @ExperimentalGetImage
     @RequiresApi(Build.VERSION_CODES.P)
     private fun openCameraAndStartPreview(cameraId : String) {
         previewSize = Utils.cameraMaxResolution(cameraManager, cameraId)
@@ -95,38 +113,21 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                 startPreview()
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
-                    Log.v(
-                        TAG,
-                        image?.width.toString()
-                                + "x"
-                                + image?.height.toString()
-                                + " "
-                                + image?.format.toString()
-                                + " "
-                                + image?.planes?.get(0)?.buffer.toString()
-                                + " "
-                                + image?.planes?.get(1)?.buffer.toString()
-                                + " "
-                                + image?.planes?.get(2)?.buffer.toString()
-                    )
-
                     val cropedBitmap = cropImage_YUV_420_888(image, Rect(0,0,480, 640))
-//                    Log.v(TAG, Thread.currentThread().name)
-                    Log.v(
-                        TAG,
-                        cropedBitmap.width.toString()
-                                + "x"
-                                + cropedBitmap.height.toString()
-                    )
-                    rotateBitmap(cropedBitmap, 270f).let {
+                    image.close()
+                    if(isBusy) {
+                        return@setOnImageAvailableListener
+                    }
+                    isBusy = true
+                    rotateBitmap(cropedBitmap, 90f).let { // 270 - front, 90 - back
                         MainScope().launch {
                             onBitmap(it)
                         }
                     }
-
-                    val inputImage = InputImage.fromBitmap(cropedBitmap, 0)
-
-                    image.close()
+                    val cropedInputImage = InputImage.fromBitmap(cropedBitmap, 0)
+                    mlObjectRecognizer.processImage(cropedInputImage) {
+                        isBusy = false
+                    }
                 }, imageReaderHandler)
             }
         }

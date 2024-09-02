@@ -5,6 +5,7 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import com.google.android.odml.image.MediaMlImageBuilder
 import com.google.mlkit.common.model.LocalModel
+import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.objects.DetectedObject
 import com.google.mlkit.vision.objects.ObjectDetection
 import com.google.mlkit.vision.objects.ObjectDetector
@@ -52,6 +53,20 @@ abstract class MlObjectRecognizer {
                         exit(image)
                     }
             }
+        }
+    }
+
+    @ExperimentalGetImage
+    fun processImage(image : InputImage, exit: ()->Unit) {
+        GlobalScope.launch(Dispatchers.Main) {
+            objectDetector.process(image)
+                .addOnSuccessListener { result ->
+                    onDetect(result)
+                    exit()
+                }
+                .addOnFailureListener { e ->
+                    exit()
+                }
         }
     }
 }
