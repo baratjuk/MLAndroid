@@ -3,6 +3,7 @@ package com.example.ml.activity
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -39,6 +40,10 @@ class Camera2Activity : ComponentActivity() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     binding.texture.scaleY = Utils.yScale(this.context, previewSize)
                 }
+            }
+
+            override fun onBitmap(bitmap: Bitmap) {
+                binding.image1.setImageBitmap(bitmap)
             }
 
             override fun onClose() {

@@ -2,9 +2,12 @@ package com.example.ml.businesLogic
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
+import android.graphics.YuvImage
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
@@ -24,14 +27,16 @@ import android.view.TextureView.SurfaceTextureListener
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
-import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
+import androidx.compose.runtime.mutableStateOf
+import com.google.mlkit.vision.common.InputImage
 
 public abstract class Camera2ViewModel(val context : Context, val textureView: TextureView) : ViewModel() {
 
@@ -40,6 +45,7 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
     }
 
     abstract fun onOpen(previewSize: Size)
+    abstract fun onBitmap(bitmap: Bitmap)
     abstract fun onClose()
     abstract fun onError(type: ErrorTypes, code: Int)
 
@@ -94,12 +100,32 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                                 + " "
                                 + image?.format.toString()
                                 + " "
-                                + image?.planes?.size
+                                + image?.planes?.get(0)?.buffer.toString()
+                                + " "
+                                + image?.planes?.get(1)?.buffer.toString()
+                                + " "
+                                + image?.planes?.get(2)?.buffer.toString()
                     )
 
-//                    val cropedImage = cropImage_YUV_420_888(image, Rect(0,0,480, 640), 90)
+                    val cropedBitmap = cropImage_YUV_420_888(image, Rect(0,0,480, 640))
 //                    Log.v(TAG, Thread.currentThread().name)
+                    Log.v(com.example.ml.businesLogic.TAG,
+                        cropedBitmap.width.toString()
+                                + "x"
+                                + cropedBitmap.height.toString()
+                    )
+
+                    cropedBitmap.let {
+                        MainScope().launch {
+//                            Log.v(com.example.ml.businesLogic.TAG,Thread.currentThread().name)
+                            onBitmap(it)
+                        }
+                    }
+
+                    val inputImage = InputImage.fromBitmap(cropedBitmap, 0)
+
                     image.close()
+//                    cropedImage?.recycle()
                 }, imageReaderHandler)
             }
         }
@@ -160,20 +186,7 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         cameraDevice.createCaptureSession(sessionConfig)
     }
 
-    fun cropImage_YUV_420_888(mediaImage: Image, cropRect : Rect, rotation: Int) : Image? {
-        croppedNV21(mediaImage, cropRect).let { byteArray ->
-            val inputImage = InputImage.fromByteArray(
-                byteArray,
-                cropRect.width(),
-                cropRect.height(),
-                rotation,
-                ImageFormat.NV21,
-            )
-            return inputImage.mediaImage
-        }
-    }
-
-    private fun croppedNV21(mediaImage: Image, cropRect: Rect): ByteArray {
+    private fun cropImage_YUV_420_888(mediaImage: Image, cropRect: Rect): Bitmap {
         val yBuffer = mediaImage.planes[0].buffer // Y
         val vuBuffer = mediaImage.planes[2].buffer // VU
         val ySize = yBuffer.remaining()
@@ -181,21 +194,10 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         val nv21 = ByteArray(ySize + vuSize)
         yBuffer.get(nv21, 0, ySize)
         vuBuffer.get(nv21, ySize, vuSize)
-        return cropByteArray(nv21, mediaImage.width, cropRect)
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, mediaImage.width, mediaImage.height, null)
+        val outputStream = ByteArrayOutputStream()
+        yuvImage.compressToJpeg(cropRect, 100, outputStream)
+        val imageBytes = outputStream.toByteArray()
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
     }
-
-    private fun cropByteArray(array: ByteArray, imageWidth: Int, cropRect: Rect): ByteArray {
-        val croppedArray = ByteArray(cropRect.width() * cropRect.height())
-        var i = 0
-        array.forEachIndexed { index, byte ->
-            val x = index % imageWidth
-            val y = index / imageWidth
-            if (cropRect.left <= x && x < cropRect.right && cropRect.top <= y && y < cropRect.bottom) {
-                croppedArray[i] = byte
-                i++
-            }
-        }
-        return croppedArray
-    }
-
 }
