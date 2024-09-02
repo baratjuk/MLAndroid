@@ -1,5 +1,6 @@
 package com.example.ml.businesLogic
 
+import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import com.google.android.odml.image.MediaMlImageBuilder
@@ -41,6 +42,7 @@ abstract class MlObjectRecognizer {
                         .build()
                 }
             mlImage?.let {
+//                Log.v(TAG, it.width.toString() + "x" + it.height.toString())
                 objectDetector.process(it)
                     .addOnSuccessListener { result ->
                         onDetect(result)

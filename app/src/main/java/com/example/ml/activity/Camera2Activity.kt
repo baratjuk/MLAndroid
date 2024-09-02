@@ -1,7 +1,5 @@
 package com.example.ml.activity
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.os.Build
@@ -9,7 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Size
 import androidx.activity.ComponentActivity
-import com.example.ml.businesLogic.Camera2ViewModel
+import com.example.ml.vm.Camera2ViewModel
 import com.example.ml.businesLogic.Utils
 import com.example.ml.businesLogic.allRuntimePermissionsGranted
 import com.example.ml.businesLogic.getRuntimePermissions

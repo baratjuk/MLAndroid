@@ -1,4 +1,4 @@
-package com.example.ml.businesLogic
+package com.example.ml.vm
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -36,7 +36,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
-import androidx.compose.runtime.mutableStateOf
+import com.example.ml.businesLogic.TAG
+import com.example.ml.businesLogic.Utils
 import com.google.mlkit.vision.common.InputImage
 
 public abstract class Camera2ViewModel(val context : Context, val textureView: TextureView) : ViewModel() {
@@ -94,7 +95,8 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                 startPreview()
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
-                    Log.v(com.example.ml.businesLogic.TAG,
+                    Log.v(
+                        TAG,
                         image?.width.toString()
                                 + "x"
                                 + image?.height.toString()
@@ -110,7 +112,8 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
 
                     val cropedBitmap = cropImage_YUV_420_888(image, Rect(0,0,480, 640))
 //                    Log.v(TAG, Thread.currentThread().name)
-                    Log.v(com.example.ml.businesLogic.TAG,
+                    Log.v(
+                        TAG,
                         cropedBitmap.width.toString()
                                 + "x"
                                 + cropedBitmap.height.toString()
