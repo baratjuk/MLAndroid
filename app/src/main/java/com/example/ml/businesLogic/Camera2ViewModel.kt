@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.graphics.YuvImage
@@ -114,10 +115,8 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                                 + "x"
                                 + cropedBitmap.height.toString()
                     )
-
-                    cropedBitmap.let {
+                    rotateBitmap(cropedBitmap, 270f).let {
                         MainScope().launch {
-//                            Log.v(com.example.ml.businesLogic.TAG,Thread.currentThread().name)
                             onBitmap(it)
                         }
                     }
@@ -125,7 +124,6 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                     val inputImage = InputImage.fromBitmap(cropedBitmap, 0)
 
                     image.close()
-//                    cropedImage?.recycle()
                 }, imageReaderHandler)
             }
         }
@@ -199,5 +197,20 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         yuvImage.compressToJpeg(cropRect, 100, outputStream)
         val imageBytes = outputStream.toByteArray()
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+    }
+
+    private fun rotateBitmap(bitmap: Bitmap, rotationAngle: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(rotationAngle)
+        val rotatedBitmap = Bitmap.createBitmap(
+            bitmap,
+            0,
+            0,
+            bitmap.getWidth(),
+            bitmap.getHeight(),
+            matrix,
+            true
+        )
+        return rotatedBitmap
     }
 }
