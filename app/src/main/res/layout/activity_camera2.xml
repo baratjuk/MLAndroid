@@ -12,11 +12,21 @@
         android:id="@+id/texture"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <View
+        android:background="@color/teal_200"
+        android:layout_centerVertical="true"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+    <View
+        android:background="@color/teal_200"
+        android:layout_centerHorizontal="true"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"/>
     <ImageView
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:id="@+id/image1"
         android:layout_width="640px"
-        android:layout_height="640px"/>
+        android:layout_height="480px"/>
 </RelativeLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>
