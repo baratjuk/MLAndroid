@@ -117,23 +117,27 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                 startPreview()
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
-                    val cropedBitmap = cropImage_YUV_420_888(image, centralRect)
+                    val cropedList = cropImages_YUV_420_888(image, 270)
+//                    val cropedBitmap = cropImage_YUV_420_888(image, centralRect)
                     image.close()
                     if(isBusy) {
                         return@setOnImageAvailableListener
                     }
                     isBusy = true
-                    val rotatedBitmap = rotateBitmap(cropedBitmap, 270f) // 270 - front, 90 - back
-                    MainScope().launch {
-                        onBitmap(rotatedBitmap)
-                        cropedBitmap.recycle()
-                    }
-                    val cropedRotatedInputImage = InputImage.fromBitmap(rotatedBitmap, 0)
-                    mlObjectRecognizer.processImage(cropedRotatedInputImage) {
-                        isBusy = false
-                    }
+                    requestAllImages(cropedList)
                 }, imageReaderHandler)
             }
+        }
+    }
+
+    @ExperimentalGetImage
+    private fun requestAllImages(cropedList: List<InputImage>, count: Int = cropedList.size - 1) {
+        if(count < 0) {
+            isBusy = false
+            return
+        }
+        mlObjectRecognizer.processImage(cropedList[count]) {
+            requestAllImages(cropedList, count = count - 1)
         }
     }
 
@@ -206,6 +210,34 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
         val imageBytes = outputStream.toByteArray()
         val cropedBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
         return cropedBitmap
+    }
+
+    private fun cropImages_YUV_420_888(mediaImage: Image, rotationDegrees: Int): List<InputImage> {
+        val yBuffer = mediaImage.planes[0].buffer // Y
+        val vuBuffer = mediaImage.planes[2].buffer // VU
+        val ySize = yBuffer.remaining()
+        val vuSize = vuBuffer.remaining()
+        val nv21 = ByteArray(ySize + vuSize)
+        yBuffer.get(nv21, 0, ySize)
+        vuBuffer.get(nv21, ySize, vuSize)
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, mediaImage.width, mediaImage.height, null)
+        val outputStream = ByteArrayOutputStream()
+        var list = mutableListOf<InputImage>()
+        val W = 640
+        val H = 480
+        Log.v(TAG, previewSize.toString())
+        for(x in 0..(previewSize.width - W) step W) {
+            for(y in 0..(previewSize.height - H) step H) {
+                var cropRect = Rect(x, y, W + x, H + y)
+//                Log.v(TAG, cropRect.toString())
+                yuvImage.compressToJpeg(cropRect, 100, outputStream)
+                val imageBytes = outputStream.toByteArray()
+                val cropedBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                val cropedRotatedInputImage = InputImage.fromBitmap(cropedBitmap, rotationDegrees)
+                list.add(cropedRotatedInputImage)
+            }
+        }
+        return list
     }
 
     private fun rotateBitmap(bitmap: Bitmap, rotationAngle: Float): Bitmap {
