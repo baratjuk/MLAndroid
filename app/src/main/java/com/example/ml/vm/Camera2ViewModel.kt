@@ -30,6 +30,10 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import com.example.ml.businesLogic.MlObjectRecognizer
+import com.example.ml.businesLogic.TAG
+import com.example.ml.businesLogic.Utils
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.objects.DetectedObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
@@ -37,11 +41,9 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 import kotlin.coroutines.resume
-import com.example.ml.businesLogic.TAG
-import com.example.ml.businesLogic.Utils
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.objects.DetectedObject
+
 
 public abstract class Camera2ViewModel(val context : Context, val textureView: TextureView) : ViewModel() {
 
@@ -117,13 +119,19 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
                 startPreview()
                 imageReader.setOnImageAvailableListener({ reader ->
                     val image = reader.acquireLatestImage()
-                    val cropedList = cropImages_YUV_420_888(image, 270)
+                    val cropedList = cropImages_YUV_420_888(image, 180)
 //                    val cropedBitmap = cropImage_YUV_420_888(image, centralRect)
                     image.close()
                     if(isBusy) {
                         return@setOnImageAvailableListener
                     }
                     isBusy = true
+                    MainScope().launch {
+                        val inputImage = cropedList[0]
+                        inputImage.bitmapInternal?.let {
+                            onBitmap(it)
+                        }
+                    }
                     requestAllImages(cropedList)
                 }, imageReaderHandler)
             }
@@ -253,5 +261,13 @@ public abstract class Camera2ViewModel(val context : Context, val textureView: T
             true
         )
         return rotatedBitmap
+    }
+
+    private fun convertImageToBitmap(image: Image): Bitmap {
+        val buffer: ByteBuffer = image.planes.get(0).buffer
+        val bytes = ByteArray(buffer.capacity())
+        buffer.get(bytes)
+        val bitmapImage: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
+        return bitmapImage
     }
 }
